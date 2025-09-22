@@ -19,7 +19,7 @@ app.use(cors({
   methods: ['GET','POST','PUT','DELETE']
 }));
 
-// Rate limiter for auth endpoints (basic)
+// Rate limiter for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,

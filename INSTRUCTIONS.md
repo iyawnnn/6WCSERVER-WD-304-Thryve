@@ -1,11 +1,10 @@
-# Thryve — Fitness & Health Tracker
-
----
 
 ## Quick Setup
 
-## 1. Clone the Repo
-git clone <your-repo-url>
+---
+
+### 1. Clone the Repository
+git clone https://github.com/iyawnnn/Thryve.git
 cd Thryve
 
 ## Backend Setup
@@ -32,8 +31,11 @@ Users are redirected automatically based on login status (token in localStorage)
 
 ## API Endpoints
 /api/auth/register - Register a new user
+
 /api/auth/login - Login
+
 /api/auth/me - Get current user info (token required)
+
 /api/dashboard - Protected Dashboard data
 
 Use the included postman_collection.json to test API requests.
