@@ -4,16 +4,22 @@ import Register from "../views/Register.vue";
 import Dashboard from "../views/Dashboard.vue";
 import ForgotPassword from "../views/ForgotPassword.vue";
 import ResetPassword from "../views/ResetPassword.vue";
+import Meals from "../views/Meals.vue";
+import Workouts from "../views/Workouts.vue";
 
 const routes = [
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
+  { path: "/meals", component: Meals, meta: { requiresAuth: true } },
+  { path: "/workouts", component: Workouts, meta: { requiresAuth: true } },
   { path: "/forgot-password", component: ForgotPassword },
   { path: "/reset-password/:token", component: ResetPassword },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });
+
+// Auth guard
 router.beforeEach((to, from, next) => {
   const token =
     localStorage.getItem("token") || sessionStorage.getItem("token");

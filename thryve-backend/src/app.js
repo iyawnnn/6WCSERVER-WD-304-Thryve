@@ -6,6 +6,8 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/auth');
 const errorHandler = require('./middleware/errorHandler');
+const workoutsRouter = require('./routes/workout');
+const mealsRoutes = require("./routes/meals");
 
 const app = express();
 
@@ -37,6 +39,9 @@ const authMiddleware = require('./middleware/authMiddleware');
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   res.json({ message: 'Protected route OK', userId: req.user.userId });
 });
+
+app.use('/api/workouts', workoutsRouter);
+app.use("/api/meals", mealsRoutes);
 
 // Error handler
 app.use(errorHandler);

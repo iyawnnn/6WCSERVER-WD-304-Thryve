@@ -113,6 +113,266 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Add Meal",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQwZmM1Mzg2N2Y5ZDk3OTgzNWViN2QiLCJlbWFpbCI6InRlc3QzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU4NjA2NjQxLCJleHAiOjE3NTg2MTAyNDF9.bSSPwrfHBtFoEV_mg5RbwhZbu_x4r1x4InfwaVNZCYI",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"foodName\": \"Chicken Salad\",\r\n  \"calories\": 350,\r\n  \"date\": \"2025-09-23\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/meals",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"meals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Meal",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQwZmM1Mzg2N2Y5ZDk3OTgzNWViN2QiLCJlbWFpbCI6InRlc3QzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU4NjA2NjQxLCJleHAiOjE3NTg2MTAyNDF9.bSSPwrfHBtFoEV_mg5RbwhZbu_x4r1x4InfwaVNZCYI",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/meals",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"meals"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Meal",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQwZmM1Mzg2N2Y5ZDk3OTgzNWViN2QiLCJlbWFpbCI6InRlc3QzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU4NjA2NjQxLCJleHAiOjE3NTg2MTAyNDF9.bSSPwrfHBtFoEV_mg5RbwhZbu_x4r1x4InfwaVNZCYI",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"foodName\": \"Grilled Chicken Salad\",\r\n  \"calories\": 400,\r\n  \"date\": \"2025-09-24\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/meals/68d239e85f4ae870aa85f198",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"meals",
+						"68d239e85f4ae870aa85f198"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Meal",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQwZmM1Mzg2N2Y5ZDk3OTgzNWViN2QiLCJlbWFpbCI6InRlc3QzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU4NjA2NjQxLCJleHAiOjE3NTg2MTAyNDF9.bSSPwrfHBtFoEV_mg5RbwhZbu_x4r1x4InfwaVNZCYI",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/meals/68d237fd40ab037c9b161122?Au",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"meals",
+						"68d237fd40ab037c9b161122"
+					],
+					"query": [
+						{
+							"key": "Au",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Workout",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQxNDIxMGYzNWNjZjk3ZDhlZDFlYjciLCJlbWFpbCI6Imlhbm5tYWNhYnVsb3NAZ21haWwuY29tIiwiaWF0IjoxNzU4NjIxMDA1LCJleHAiOjE3NTg2MjQ2MDV9.2rmTas-9UFxRZIV2e1MBOU1gk6QZOT91trKHXNWRKV8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Swimming\",\r\n  \"duration\": 30,\r\n  \"calories\": 250\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/workouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Workout",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQxNDIxMGYzNWNjZjk3ZDhlZDFlYjciLCJlbWFpbCI6Imlhbm5tYWNhYnVsb3NAZ21haWwuY29tIiwiaWF0IjoxNzU4NjIxMDA1LCJleHAiOjE3NTg2MjQ2MDV9.2rmTas-9UFxRZIV2e1MBOU1gk6QZOT91trKHXNWRKV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/workouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Workout",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQxNDIxMGYzNWNjZjk3ZDhlZDFlYjciLCJlbWFpbCI6Imlhbm5tYWNhYnVsb3NAZ21haWwuY29tIiwiaWF0IjoxNzU4NjIxMDA1LCJleHAiOjE3NTg2MjQ2MDV9.2rmTas-9UFxRZIV2e1MBOU1gk6QZOT91trKHXNWRKV8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"type\": \"Cycling\",\r\n  \"duration\": 45,\r\n  \"calories\": 400\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/workouts/68d26d7b0a8beee87bbb6736?auth",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"workouts",
+						"68d26d7b0a8beee87bbb6736"
+					],
+					"query": [
+						{
+							"key": "auth",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Workout",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OGQxNDIxMGYzNWNjZjk3ZDhlZDFlYjciLCJlbWFpbCI6Imlhbm5tYWNhYnVsb3NAZ21haWwuY29tIiwiaWF0IjoxNzU4NjIxMDA1LCJleHAiOjE3NTg2MjQ2MDV9.2rmTas-9UFxRZIV2e1MBOU1gk6QZOT91trKHXNWRKV8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/workouts/68d26d7b0a8beee87bbb6736",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"workouts",
+						"68d26d7b0a8beee87bbb6736"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

@@ -107,7 +107,7 @@ const login = async () => {
 }
 
 .remember-label {
-  color: #000;
+  color: var(--color-dark);
 }
 
 .form-check-input:checked {
@@ -157,7 +157,7 @@ input::placeholder {
   top: 50%;
   cursor: pointer;
   font-size: 1.1rem;
-  color: #333;
+  color: #555;
   z-index: 10;
 }
 

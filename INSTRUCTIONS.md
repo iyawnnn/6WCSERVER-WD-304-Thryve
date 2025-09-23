@@ -16,7 +16,7 @@ npm run dev
 Runs backend at: http://localhost:5000
 
 ## Frontend Setup
-cd ../thryve-frontend
+cd thryve-frontend
 npm install
 npm run dev
 
@@ -26,6 +26,8 @@ Runs frontend at: http://localhost:5173
 /register - Register a new user
 /login - login existing user
 /dashboard - protected dashboard page
+/meals - Manage meals: add, edit, delete, history
+/workouts - Manage workouts: add, edit, delete, history
 
 Users are redirected automatically based on login status (token in localStorage).
 
