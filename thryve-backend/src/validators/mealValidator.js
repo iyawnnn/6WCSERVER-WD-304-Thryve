@@ -13,7 +13,12 @@ exports.createMealValidator = [
     .notEmpty()
     .withMessage("Calories are required")
     .isFloat({ min: 1 })
-    .withMessage("Calories cannot be negative"),
+    .withMessage("Calories must be 1 or higher"),
+
+  body("protein")
+    .optional() 
+    .isFloat({ min: 0 })
+    .withMessage("Protein must be 0 or higher"),
 
   body("date")
     .notEmpty()
@@ -23,7 +28,7 @@ exports.createMealValidator = [
     .withMessage("Date must be a valid date")
     .custom((value) => {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); 
+      today.setHours(0, 0, 0, 0);
       const inputDate = new Date(value);
       inputDate.setHours(0, 0, 0, 0);
 

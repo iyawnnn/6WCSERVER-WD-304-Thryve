@@ -26,7 +26,7 @@ router.post(
 // Get all meals for logged-in user (GET /api/meals)
 router.get("/", authMiddleware, getMeals);
 
-// Update a meal (PUT /api/meals/:id) ✅ with validator
+// Update a meal (PUT /api/meals/:id) with validator
 router.put(
   "/:id",
   authMiddleware,

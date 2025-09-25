@@ -2,13 +2,14 @@ const Meal = require("../models/Meal");
 
 exports.createMeal = async (req, res) => {
   try {
-    const { foodName, calories, date } = req.body;
+    const { foodName, calories, protein = 0, date } = req.body;
 
     const meal = new Meal({
       foodName,
       calories,
+      protein,
       date,
-      userId: req.user.userId, // ✅ use userId
+      userId: req.user.userId,
     });
 
     await meal.save();
@@ -18,6 +19,7 @@ exports.createMeal = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
 
 exports.getMeals = async (req, res) => {
   try {

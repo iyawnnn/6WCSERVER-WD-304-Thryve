@@ -4,50 +4,45 @@ import api from "../utils/api";
 import { meals } from "../composables/useMeals.js";
 
 
-const foodName = ref("");
-const calories = ref("");
-const date = ref(new Date().toISOString().split("T")[0]); // today
+const emit = defineEmits(["mealAdded"]);
 
-const today = date.value;
+const foodName = ref("");
+const calories = ref(0);
+const protein = ref(0);
+const date = ref(new Date().toISOString().slice(0, 10));
+const maxDate = new Date().toISOString().slice(0, 10);
 
 const addMeal = async () => {
   try {
-    if (!foodName.value.trim()) {
-      alert("Please enter a food name.");
-      return;
-    }
+    const selectedDate = new Date(date.value);
+    selectedDate.setHours(0, 0, 0, 0);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
 
-    if (!calories.value || calories.value < 0) {
-      alert("Calories must be 0 or higher.");
-      return;
-    }
-
-    if (!date.value) {
-      alert("Please select a date.");
-      return;
-    }
-
-    if (new Date(date.value) > new Date(today)) {
-      alert("Date cannot be in the future.");
-      return;
-    }
+    if (!foodName.value.trim()) throw new Error("Food name is required");
+    if (calories.value < 0) throw new Error("Calories must be 0 or higher");
+    if (protein.value < 0) throw new Error("Protein must be 0 or higher");
+    if (selectedDate > todayDate)
+      throw new Error("Date cannot be in the future");
 
     const res = await api.post("/meals", {
       foodName: foodName.value.trim(),
       calories: Number(calories.value),
-      date: new Date(date.value),
+      protein: Number(protein.value),
+      date: date.value, 
     });
 
-    // ✅ Add new meal directly to meals array
     meals.value.unshift(res.data);
+    emit("mealAdded");
 
     // Reset form
     foodName.value = "";
-    calories.value = "";
-    date.value = today;
+    calories.value = 0;
+    protein.value = 0;
+    date.value = maxDate;
   } catch (err) {
+    alert(err.message || "Failed to add meal");
     console.error(err.response?.data || err.message);
-    alert("Failed to add meal.");
   }
 };
 </script>
@@ -55,13 +50,26 @@ const addMeal = async () => {
 <template>
   <form @submit.prevent="addMeal">
     <div class="mb-2">
-      <input v-model="foodName" placeholder="Meal name" required />
+      <input v-model="foodName" placeholder="Meal name" />
     </div>
     <div class="mb-2">
-      <input v-model.number="calories" type="number" placeholder="Calories" min="1" required />
+      <input
+        v-model.number="calories"
+        type="number"
+        placeholder="Calories"
+        min="0"
+      />
     </div>
     <div class="mb-2">
-      <input v-model="date" type="date" :max="today" required />
+      <input
+        v-model.number="protein"
+        type="number"
+        placeholder="Protein (g)"
+        min="0"
+      />
+    </div>
+    <div class="mb-2">
+      <input v-model="date" type="date" :max="maxDate" />
     </div>
     <button type="submit">Add Meal</button>
   </form>

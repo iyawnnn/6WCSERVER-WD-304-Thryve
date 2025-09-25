@@ -19,11 +19,30 @@
             />
           </div>
           <div class="mb-2">
+            <label class="form-label">Protein (g)</label>
+            <input
+              v-model.number="meal.protein"
+              type="number"
+              class="form-control"
+              min="0"
+            />
+          </div>
+          <div class="mb-2">
             <label class="form-label">Date</label>
-            <input v-model="mealDate" type="date" class="form-control" :max="today" required />
+            <input
+              v-model="mealDate"
+              type="date"
+              class="form-control"
+              :max="today"
+              required
+            />
           </div>
           <div class="d-flex justify-content-end">
-            <button type="button" class="btn btn-secondary me-2" @click="$emit('close')">
+            <button
+              type="button"
+              class="btn btn-secondary me-2"
+              @click="$emit('close')"
+            >
               Cancel
             </button>
             <button type="submit" class="btn btn-primary">Update</button>
@@ -51,7 +70,6 @@ export default {
     const updateMeal = async () => {
       try {
         const res = await api.put(`/meals/${props.meal._id}`, props.meal);
-        // ✅ Update meal in reactive array
         const index = meals.value.findIndex((m) => m._id === res.data._id);
         if (index !== -1) meals.value[index] = res.data;
 
@@ -66,4 +84,3 @@ export default {
   },
 };
 </script>
-

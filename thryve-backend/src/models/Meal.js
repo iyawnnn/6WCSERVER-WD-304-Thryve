@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const mealSchema = new mongoose.Schema({
   foodName: { type: String, required: true },
   calories: { type: Number, required: true },
-  date: { type: Date, required: true }, // ← you send `date`
+  protein: { type: Number, default: 0 }, 
+  date: { type: Date, required: true }, 
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
 });
 

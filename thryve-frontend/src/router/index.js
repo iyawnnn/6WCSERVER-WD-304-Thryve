@@ -6,6 +6,7 @@ import ForgotPassword from "../views/ForgotPassword.vue";
 import ResetPassword from "../views/ResetPassword.vue";
 import Meals from "../views/Meals.vue";
 import Workouts from "../views/Workouts.vue";
+import Profile from "../views/Profile.vue"; 
 
 const routes = [
   { path: "/login", component: Login },
@@ -15,6 +16,7 @@ const routes = [
   { path: "/workouts", component: Workouts, meta: { requiresAuth: true } },
   { path: "/forgot-password", component: ForgotPassword },
   { path: "/reset-password/:token", component: ResetPassword },
+  { path: "/profile", component: Profile },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

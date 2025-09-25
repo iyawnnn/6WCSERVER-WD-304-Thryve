@@ -4,7 +4,8 @@
 
     <section>
       <h3>Add a Meal</h3>
-      <MealForm />
+      <!-- emit mealAdded to parent -->
+      <MealForm @mealAdded="$emit('mealAdded')" />
     </section>
 
     <section>

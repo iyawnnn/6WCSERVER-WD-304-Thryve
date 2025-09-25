@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Workout = require("../models/Workout");
 
 exports.createWorkout = async (req, res) => {
@@ -9,7 +10,7 @@ exports.createWorkout = async (req, res) => {
       duration,
       calories,
       date,
-      userId: req.user.userId,
+      userId: new mongoose.Types.ObjectId(req.user.userId), // force cast
     });
 
     await workout.save();
@@ -22,7 +23,8 @@ exports.createWorkout = async (req, res) => {
 
 exports.getWorkouts = async (req, res) => {
   try {
-    const workouts = await Workout.find({ userId: req.user.userId }).sort({ timestamp: -1 });
+    const userIdObj = new mongoose.Types.ObjectId(req.user.userId);
+    const workouts = await Workout.find({ userId: userIdObj }).sort({ date: -1 }); 
     res.json(workouts);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -56,4 +58,3 @@ exports.deleteWorkout = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-

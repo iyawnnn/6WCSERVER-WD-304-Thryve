@@ -8,6 +8,9 @@ const authRoutes = require('./routes/auth');
 const errorHandler = require('./middleware/errorHandler');
 const workoutsRouter = require('./routes/workout');
 const mealsRoutes = require("./routes/meals");
+const dashboardRoutes = require('./routes/dashboard');
+const userRoutes = require("./routes/user");
+
 
 const app = express();
 
@@ -42,6 +45,9 @@ app.get('/api/dashboard', authMiddleware, (req, res) => {
 
 app.use('/api/workouts', workoutsRouter);
 app.use("/api/meals", mealsRoutes);
+
+app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/users", userRoutes);
 
 // Error handler
 app.use(errorHandler);
