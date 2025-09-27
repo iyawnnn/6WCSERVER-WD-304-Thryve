@@ -1,4 +1,3 @@
-
 const jwt = require('jsonwebtoken');
 
 function authMiddleware(req, res, next) {
@@ -8,7 +7,8 @@ function authMiddleware(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = payload; // { userId, email, iat, exp }
+    // Assign userId to req.user
+    req.user = { userId: payload.userId };
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });

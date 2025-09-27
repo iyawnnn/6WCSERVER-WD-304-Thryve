@@ -1,55 +1,85 @@
-
+// Core imports
 const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const authRoutes = require('./routes/auth');
-const errorHandler = require('./middleware/errorHandler');
-const workoutsRouter = require('./routes/workout');
-const mealsRoutes = require("./routes/meals");
-const dashboardRoutes = require('./routes/dashboard');
-const userRoutes = require("./routes/user");
+const helmet = require('helmet'); // Security middleware (sets secure HTTP headers)
+const cors = require('cors'); // Cross-Origin Resource Sharing (allow frontend to call backend)
+const morgan = require('morgan'); // HTTP request logger
+const rateLimit = require('express-rate-limit'); // Prevents brute force / spam requests
+const path = require('path');
 
+// Route imports
+const authRoutes = require('./routes/auth');
+const workoutsRouter = require('./routes/workout');
+const mealsRoutes = require('./routes/meals');
+const dashboardRoutes = require('./routes/dashboard');
+const userRoutes = require('./routes/user');
+const achievementsRoutes = require('./routes/achievements');
+const progressRoutes = require('./routes/progress');
+const masterAchievementsRoutes = require('./routes/masterAchievement');
+
+// Middleware imports
+const errorHandler = require('./middleware/errorHandler');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 
+// ====== CONFIGURATION ====== //
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 
-app.use(helmet());
-app.use(express.json());
-app.use(morgan('dev'));
+// Security middleware
+app.use(helmet()); // Adds basic security headers
+app.use(express.json()); // Parse incoming JSON requests
+app.use(morgan('dev')); // Logs requests in dev format
+
+// CORS setup (restricts who can access API)
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: FRONTEND_ORIGIN, // Only allow requests from frontend
   methods: ['GET','POST','PUT','DELETE']
 }));
 
-// Rate limiter for auth endpoints
+// ====== RATE LIMITING ====== //
+// Protect auth routes (e.g. login/register) from brute force attacks
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15-minute window
+  max: 100, // Limit each IP to 100 requests per window
 });
 app.use('/api/auth', authLimiter);
 
-// Health
-app.get('/api/health', (req, res) => res.json({ ok: true, version: '0.1.0' }));
+// ====== HEALTH CHECK ====== //
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, version: '0.1.0' });
+});
 
-// Routes
+// ====== ROUTES ====== //
+// Authentication (login, register, etc.)
 app.use('/api/auth', authRoutes);
 
-// Protected placeholder dashboard
-const authMiddleware = require('./middleware/authMiddleware');
+// Dashboard (protected route - requires valid JWT)
 app.get('/api/dashboard', authMiddleware, (req, res) => {
   res.json({ message: 'Protected route OK', userId: req.user.userId });
 });
 
+// Workouts CRUD
 app.use('/api/workouts', workoutsRouter);
-app.use("/api/meals", mealsRoutes);
 
+// Meals CRUD
+app.use('/api/meals', mealsRoutes);
+
+// Extended dashboard (stats, summaries, etc.)
 app.use('/api/dashboard', dashboardRoutes);
-app.use("/api/users", userRoutes);
 
-// Error handler
+// User-related routes (profile, settings, etc.)
+app.use('/api/users', userRoutes);
+
+// Achievements (milestones, streaks, etc.)
+app.use('/api/achievements', achievementsRoutes);
+
+// Progress tracking (daily logs, summaries, etc.)
+app.use('/api/progress', progressRoutes);
+
+// Master Achievements (list of all possible achievements)
+app.use('/api/master-achievements', masterAchievementsRoutes);
+
+// ====== ERROR HANDLING ====== //
 app.use(errorHandler);
 
 module.exports = app;

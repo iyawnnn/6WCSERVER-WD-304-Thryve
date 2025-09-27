@@ -1,13 +1,13 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import api from "../utils/api"; // ✅ important!
+import api from "../utils/api";
 import { meals, fetchMeals } from "../composables/useMeals.js";
 import MealEditModal from "./MealEditModal.vue";
 
 const editingMeal = ref(null);
 
 const editMeal = (meal) => {
-  editingMeal.value = { ...meal }; 
+  editingMeal.value = { ...meal };
 };
 
 const deleteMeal = async (id) => {
@@ -23,13 +23,14 @@ const deleteMeal = async (id) => {
 onMounted(fetchMeals);
 </script>
 
-
 <template>
   <div>
     <h2>Meal History</h2>
     <ul>
       <li v-for="meal in meals" :key="meal._id">
-        {{ meal.foodName }} - {{ meal.calories }} cal - {{ new Date(meal.date).toLocaleDateString() }}
+        {{ meal.foodName }} - {{ meal.calories }} cal - {{ meal.protein }} g
+        protein -
+        {{ new Date(meal.date).toLocaleDateString() }}
         <button @click="editMeal(meal)">Edit</button>
         <button @click="deleteMeal(meal._id)">Delete</button>
       </li>

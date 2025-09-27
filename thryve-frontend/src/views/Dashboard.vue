@@ -25,35 +25,6 @@
       </div>
     </div>
 
-    <!-- Daily Goals Progress -->
-    <div class="card mt-3 p-3">
-      <h6>Daily Goals</h6>
-
-      <div class="mb-2">
-        <label class="form-label mb-1">Calories</label>
-        <progress :value="today.progress.calories" max="100" class="w-100"></progress>
-        <small>
-          {{ today.caloriesEaten }} / {{ today.goals.calories }} kcal ({{ today.progress.calories }}%)
-        </small>
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label mb-1">Workout Minutes</label>
-        <progress :value="today.progress.workoutMinutes" max="100" class="w-100"></progress>
-        <small>
-          {{ today.workoutMinutes }} / {{ today.goals.workoutMinutes }} mins ({{ today.progress.workoutMinutes }}%)
-        </small>
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label mb-1">Protein</label>
-        <progress :value="today.progress.protein" max="100" class="w-100"></progress>
-        <small>
-          {{ today.proteinEaten }} / {{ today.goals.protein }} g ({{ today.progress.protein }}%)
-        </small>
-      </div>
-    </div>
-
     <!-- Weekly Chart -->
     <div class="card mt-4 p-3">
       <div class="d-flex justify-content-between align-items-center">
@@ -61,25 +32,68 @@
           <h5 class="mb-0">
             Last 7 days <small class="text-muted">({{ weekStartLabel }})</small>
           </h5>
+        </div>
+        <div>
           <p v-if="weekRange" class="mb-0">
             <small>Week: {{ weekRange }}</small>
           </p>
         </div>
-        <div>
-          <select v-model="weekStart" @change="setWeekStart(weekStart)" class="form-select form-select-sm">
-            <option value="Sunday">Sunday</option>
-            <option value="Monday">Monday</option>
-          </select>
-        </div>
       </div>
 
-      <div style="height: 320px" class="mt-3">
+      <div style="height: 300px" class="mt-3">
         <canvas ref="chartRef"></canvas>
       </div>
 
       <div class="mt-2">
         <small class="text-muted">
           Avg burned: {{ avg("burned") }}, Avg eaten: {{ avg("eaten") }}
+        </small>
+      </div>
+    </div>
+
+    <!-- Daily Goals Progress -->
+    <div class="card mt-3 p-3">
+      <h6>Daily Goals</h6>
+
+      <div class="mb-2">
+        <label class="form-label mb-1">Calories</label>
+        <progress
+          :value="today.progress.calories"
+          max="100"
+          class="w-100"
+        ></progress>
+        <small>
+          {{ today.caloriesEaten }} / {{ today.goals.calories }} kcal ({{
+            today.progress.calories
+          }}%)
+        </small>
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label mb-1">Workout Minutes</label>
+        <progress
+          :value="today.progress.workoutMinutes"
+          max="100"
+          class="w-100"
+        ></progress>
+        <small>
+          {{ today.workoutMinutes }} / {{ today.goals.workoutMinutes }} mins ({{
+            today.progress.workoutMinutes
+          }}%)
+        </small>
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label mb-1">Protein</label>
+        <progress
+          :value="today.progress.protein"
+          max="100"
+          class="w-100"
+        ></progress>
+        <small>
+          {{ today.proteinEaten }} / {{ today.goals.protein }} g ({{
+            today.progress.protein
+          }}%)
         </small>
       </div>
     </div>
@@ -148,7 +162,9 @@ async function setWeekStart(value) {
 // Compute today's totals from meals
 function computeMealTotals() {
   const todayStr = new Date().toISOString().slice(0, 10);
-  const todayMeals = meals.value.filter(m => m.date.slice(0, 10) === todayStr);
+  const todayMeals = meals.value.filter(
+    (m) => m.date.slice(0, 10) === todayStr
+  );
   const caloriesEaten = todayMeals.reduce((sum, m) => sum + m.calories, 0);
   const proteinEaten = todayMeals.reduce((sum, m) => sum + m.protein, 0);
   return { caloriesEaten, proteinEaten };
@@ -172,9 +188,15 @@ async function loadToday() {
     // Compute progress
     const goals = data.goals || { calories: 0, protein: 0, workoutMinutes: 0 };
     data.progress = {
-      calories: goals.calories ? Math.round((data.caloriesEaten / goals.calories) * 100) : 0,
-      protein: goals.protein ? Math.round((data.proteinEaten / goals.protein) * 100) : 0,
-      workoutMinutes: goals.workoutMinutes ? Math.round((data.workoutMinutes / goals.workoutMinutes) * 100) : 0,
+      calories: goals.calories
+        ? Math.round((data.caloriesEaten / goals.calories) * 100)
+        : 0,
+      protein: goals.protein
+        ? Math.round((data.proteinEaten / goals.protein) * 100)
+        : 0,
+      workoutMinutes: goals.workoutMinutes
+        ? Math.round((data.workoutMinutes / goals.workoutMinutes) * 100)
+        : 0,
     };
 
     today.value = data;
@@ -197,21 +219,33 @@ async function loadWeekly() {
 
 function buildChart() {
   if (!chartRef.value) return;
-  const labels = weekly.value.map(d => d.day.slice(5));
-  const burned = weekly.value.map(d => d.burned);
-  const eaten = weekly.value.map(d => d.eaten);
+  const labels = weekly.value.map((d) => d.day.slice(5));
+  const burned = weekly.value.map((d) => d.burned);
+  const eaten = weekly.value.map((d) => d.eaten);
 
   if (chartInstance) chartInstance.destroy();
   chartInstance = new Chart(chartRef.value.getContext("2d"), {
     type: "line",
-    data: { labels, datasets: [{ label: "Burned", data: burned }, { label: "Eaten", data: eaten }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } },
+    data: {
+      labels,
+      datasets: [
+        { label: "Burned", data: burned },
+        { label: "Eaten", data: eaten },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } },
+    },
   });
 }
 
 function avg(key) {
   if (!weekly.value.length) return 0;
-  return Math.round(weekly.value.reduce((s, x) => s + (x[key] || 0), 0) / weekly.value.length);
+  return Math.round(
+    weekly.value.reduce((s, x) => s + (x[key] || 0), 0) / weekly.value.length
+  );
 }
 
 // Refresh today after a meal is added
@@ -229,5 +263,7 @@ watch(weekly, () => buildChart(), { deep: true });
 </script>
 
 <style scoped>
-.display-6 { font-size: 1.8rem; }
+.display-6 {
+  font-size: 1.8rem;
+}
 </style>

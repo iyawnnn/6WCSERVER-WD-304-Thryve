@@ -7,8 +7,8 @@ import { meals } from "../composables/useMeals.js";
 const emit = defineEmits(["mealAdded"]);
 
 const foodName = ref("");
-const calories = ref(0);
-const protein = ref(0);
+const calories = ref(null);
+const protein = ref(null);
 const date = ref(new Date().toISOString().slice(0, 10));
 const maxDate = new Date().toISOString().slice(0, 10);
 
@@ -37,8 +37,8 @@ const addMeal = async () => {
 
     // Reset form
     foodName.value = "";
-    calories.value = 0;
-    protein.value = 0;
+    calories.value = null;
+    protein.value = null;
     date.value = maxDate;
   } catch (err) {
     alert(err.message || "Failed to add meal");

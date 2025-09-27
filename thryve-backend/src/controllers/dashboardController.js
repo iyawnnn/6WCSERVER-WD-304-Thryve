@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const Meal = require("../models/Meal");
 const Workout = require("../models/Workout");
 const User = require("../models/User");
+const Preferences = require("../models/Preferences");
+const Progress = require("../models/Progress");
 
 // Helpers
 const toDateString = (d) => d.toISOString().slice(0, 10);
@@ -45,12 +47,6 @@ exports.getToday = async (req, res, next) => {
     const userIdObj = castUserId(req.user);
     if (!userIdObj) return res.status(400).json({ error: "Invalid user id" });
 
-    // Fetch user with daily goals including protein
-    const userDoc = await User.findById(userIdObj)
-      .select("dailyCaloriesGoal dailyWorkoutMinutesGoal dailyProteinGoal")
-      .lean();
-    if (!userDoc) return res.status(404).json({ error: "User not found" });
-
     const start = startOfDayUTC(new Date());
     const end = endOfDayUTC(new Date());
 
@@ -62,7 +58,7 @@ exports.getToday = async (req, res, next) => {
           $group: {
             _id: null,
             totalCalories: { $sum: "$calories" },
-            totalMinutes: { $sum: "$duration" },
+            totalMinutes: { $sum: "$duration" }, // <-- workout minutes
           },
         },
       ]),
@@ -72,7 +68,7 @@ exports.getToday = async (req, res, next) => {
           $group: {
             _id: null,
             totalCalories: { $sum: "$calories" },
-            totalProtein: { $sum: "$protein" }, // assuming Meal has a protein field
+            totalProtein: { $sum: "$protein" },
           },
         },
       ]),
@@ -84,16 +80,20 @@ exports.getToday = async (req, res, next) => {
     const proteinEaten = mealAgg[0]?.totalProtein || 0;
     const net = caloriesEaten - caloriesBurned;
 
+    // Fetch goals from UserSettings
+    const settings = await Preferences.findOne({ userId: userIdObj }).lean();
+    const goals = {
+      calories: settings?.dailyCaloriesGoal || 0,
+      protein: settings?.dailyProteinGoal || 0,
+      workoutMinutes: settings?.dailyWorkoutMinutesGoal || 0,
+    };
+
     // Progress calculations
-    const calorieProgress = userDoc.dailyCaloriesGoal
-      ? Math.round((caloriesEaten / userDoc.dailyCaloriesGoal) * 100)
-      : 0;
-    const workoutProgress = userDoc.dailyWorkoutMinutesGoal
-      ? Math.round((workoutMinutes / userDoc.dailyWorkoutMinutesGoal) * 100)
-      : 0;
-    const proteinProgress = userDoc.dailyProteinGoal
-      ? Math.round((proteinEaten / userDoc.dailyProteinGoal) * 100)
-      : 0;
+    const progress = {
+      calories: goals.calories ? Math.round((caloriesEaten / goals.calories) * 100) : 0,
+      protein: goals.protein ? Math.round((proteinEaten / goals.protein) * 100) : 0,
+      workoutMinutes: goals.workoutMinutes ? Math.round((workoutMinutes / goals.workoutMinutes) * 100) : 0,
+    };
 
     return res.json({
       caloriesBurned,
@@ -101,15 +101,11 @@ exports.getToday = async (req, res, next) => {
       workoutMinutes,
       proteinEaten,
       net,
-      goals: {
-        calories: userDoc.dailyCaloriesGoal || 0,
-        workoutMinutes: userDoc.dailyWorkoutMinutesGoal || 0,
-        protein: userDoc.dailyProteinGoal || 0,
-      },
+      goals,
       progress: {
-        calories: Math.min(calorieProgress, 100),
-        workoutMinutes: Math.min(workoutProgress, 100),
-        protein: Math.min(proteinProgress, 100),
+        calories: Math.min(progress.calories, 100),
+        protein: Math.min(progress.protein, 100),
+        workoutMinutes: Math.min(progress.workoutMinutes, 100),
       },
     });
   } catch (err) {
@@ -117,8 +113,6 @@ exports.getToday = async (req, res, next) => {
     next(err);
   }
 };
-
-
 
 
 

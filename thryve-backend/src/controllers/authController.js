@@ -4,6 +4,7 @@ const User = require("../models/User");
 const { generateToken } = require("../utils/token");
 const sendEmail = require("../utils/mailer");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 
 const SALT_ROUNDS = 10;
 
@@ -21,37 +22,56 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-exports.register = async (req, res, next) => {
-  try {
-    const { error, value } = registerSchema.validate(req.body);
-    if (error) return res.status(400).json({ error: error.details[0].message });
+function convertFtInToCm(ftIn) {
+  const match = /^(\d{1,2})'(\d{1,2})$/.exec(ftIn);
+  if (!match) return null;
+  const feet = parseInt(match[1], 10);
+  const inches = parseInt(match[2], 10);
+  return Math.round((feet * 12 + inches) * 2.54);
+}
 
-    const { name, email, password, age, weight, height } = value;
+const Preferences = require("../models/Preferences");
+
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password, age, weight, height } = req.body;
 
     const existing = await User.findOne({ email });
-    if (existing)
-      return res.status(409).json({ error: "Email already registered" });
+    if (existing) return res.status(400).json({ error: "Email already exists" });
 
-    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    const user = await User.create({
+    const user = new User({
       name,
       email,
-      password: hashed,
+      password: hashedPassword,
       age,
       weight,
       height,
     });
+    await user.save();
 
-    const token = generateToken(user);
-    const userObj = user.toObject();
-    delete userObj.password;
+    // Create default Preferences for this user
+    const preferences = new Preferences({
+      userId: user._id,
+      // defaults from model will be applied automatically
+    });
+    await preferences.save();
 
-    res.status(201).json({ token, user: userObj });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.status(201).json({
+      token,
+      user: { id: user._id, name: user.name, email: user.email },
+    });
   } catch (err) {
-    next(err);
+    console.error("Registration error:", err);
+    res.status(500).json({ error: "Registration failed" });
   }
 };
+
 
 exports.login = async (req, res, next) => {
   try {
@@ -120,7 +140,7 @@ exports.resetPassword = async (req, res) => {
 
     const user = await User.findOne({
       resetToken: token,
-      resetTokenExpiry: { $gt: new Date() }, 
+      resetTokenExpiry: { $gt: new Date() },
     });
 
     if (!user) {
@@ -143,4 +163,3 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
-

@@ -7,6 +7,7 @@ import ResetPassword from "../views/ResetPassword.vue";
 import Meals from "../views/Meals.vue";
 import Workouts from "../views/Workouts.vue";
 import Profile from "../views/Profile.vue"; 
+import Achievements from '../views/Achievements.vue';
 
 const routes = [
   { path: "/login", component: Login },
@@ -17,6 +18,7 @@ const routes = [
   { path: "/forgot-password", component: ForgotPassword },
   { path: "/reset-password/:token", component: ResetPassword },
   { path: "/profile", component: Profile },
+  { path: '/achievements', component: Achievements },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

@@ -12,6 +12,6 @@ export default {
     return Api.get("/dashboard/highlights");
   },
   updateGoals(goals) {
-    return api.put("/users/preferences", goals); 
+    return api.put("/users/preferences", goals);
   },
 };

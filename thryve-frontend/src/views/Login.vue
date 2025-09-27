@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
+const auth = useAuthStore();
+
 const email = ref("");
 const password = ref("");
 const rememberMe = ref(false);
@@ -12,16 +14,13 @@ const error = ref("");
 
 const login = async () => {
   try {
-    const res = await axios.post("http://localhost:5000/api/auth/login", {
+    await auth.doLogin({
       email: email.value,
       password: password.value,
     });
 
-    if (rememberMe.value) {
-      localStorage.setItem("token", res.data.token);
-    } else {
-      sessionStorage.setItem("token", res.data.token);
-    }
+    // token + user are now set inside Pinia store
+    // already persisted to localStorage by doLogin()
 
     router.push("/dashboard");
   } catch (err) {
@@ -29,6 +28,7 @@ const login = async () => {
   }
 };
 </script>
+
 
 <template>
   <div
