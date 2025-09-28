@@ -15,6 +15,8 @@ const userRoutes = require('./routes/user');
 const achievementsRoutes = require('./routes/achievements');
 const progressRoutes = require('./routes/progress');
 const masterAchievementsRoutes = require('./routes/masterAchievement');
+const waterRoutes = require('./routes/water'); 
+const sleepRoutes = require("./routes/sleep"); 
 
 // Middleware imports
 const errorHandler = require('./middleware/errorHandler');
@@ -78,6 +80,12 @@ app.use('/api/progress', progressRoutes);
 
 // Master Achievements (list of all possible achievements)
 app.use('/api/master-achievements', masterAchievementsRoutes);
+
+// Water intake logging and retrieval
+app.use('/api/water', waterRoutes);
+
+// Sleep tracking routes
+app.use("/api/sleep", sleepRoutes);
 
 // ====== ERROR HANDLING ====== //
 app.use(errorHandler);

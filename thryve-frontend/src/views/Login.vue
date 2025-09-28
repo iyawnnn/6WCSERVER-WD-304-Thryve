@@ -1,3 +1,76 @@
+<template>
+  <div class="login-page">
+    <!-- Left Column: Form -->
+    <div class="login-form-container">
+      <div class="login-card">
+        <div class="login-header">
+          <h1 class="login-title">Login</h1>
+          <p class="login-subtitle">
+            Enter your email below to login to your account
+          </p>
+        </div>
+
+        <form @submit.prevent="login" class="login-form">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              v-model="email"
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label for="password">Password</label>
+              <router-link to="/forgot-password" class="forgot-link">
+                Forgot your password?
+              </router-link>
+            </div>
+
+            <div class="password-input-wrapper">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                id="password"
+                placeholder="********"
+                required
+              />
+              <i
+                class="bi"
+                :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                @click="showPassword = !showPassword"
+              ></i>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <p v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </p>
+
+          <button type="submit" class="btn-primary">Login</button>
+        </form>
+
+        <p class="signup-text">
+          Don't have an account?
+          <router-link to="/register" class="signup-link">Sign up</router-link>
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Cover Video -->
+    <div class="login-image-container">
+      <video autoplay muted loop playsinline class="cover-video">
+        <source src="../assets/mp4/formVideo.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -8,157 +81,29 @@ const auth = useAuthStore();
 
 const email = ref("");
 const password = ref("");
-const rememberMe = ref(false);
 const showPassword = ref(false);
-const error = ref("");
+const errorMessage = ref("");
 
 const login = async () => {
+  errorMessage.value = ""; // reset before trying
   try {
-    await auth.doLogin({
-      email: email.value,
-      password: password.value,
-    });
-
-    // token + user are now set inside Pinia store
-    // already persisted to localStorage by doLogin()
-
+    await auth.doLogin({ email: email.value, password: password.value });
     router.push("/dashboard");
   } catch (err) {
-    error.value = err.response?.data?.error || "Login failed";
+    console.error(err);
+
+    // You can customize this depending on backend response
+    if (err.response?.status === 401) {
+      errorMessage.value = "Invalid email or password.";
+    } else if (err.response?.status === 500) {
+      errorMessage.value = "Server error. Please try again later.";
+    } else {
+      errorMessage.value = "Something went wrong. Please try again.";
+    }
   }
 };
 </script>
 
-
-<template>
-  <div
-    class="login-page d-flex justify-content-center align-items-center vh-100"
-  >
-    <div class="card p-4 shadow-sm w-100">
-      <h2 class="title">Login</h2>
-      <p>Enter your email and password to login to your account</p>
-      <form @submit.prevent="login">
-        <div class="mb-3">
-          <label>Email</label>
-          <input
-            v-model="email"
-            type="email"
-            class="form-control"
-            placeholder="johndoe@gmail.com"
-            required
-          />
-        </div>
-        <div class="mb-3 position-relative">
-          <label>Password</label>
-          <input
-            v-model="password"
-            :type="showPassword ? 'text' : 'password'"
-            class="form-control"
-            placeholder="********"
-            required
-          />
-          <i
-            class="toggle-password-icon"
-            @click="showPassword = !showPassword"
-            :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
-          ></i>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div class="form-check">
-            <input
-              v-model="rememberMe"
-              type="checkbox"
-              class="form-check-input"
-              id="rememberMe"
-            />
-            <label class="form-check-label remember-label" for="rememberMe">
-              Remember me
-            </label>
-          </div>
-          <router-link to="/forgot-password" class="forgot-link">
-            Forgot your password?
-          </router-link>
-        </div>
-
-        <button type="submit" class="btn btn-dark w-100 mt-3">Login</button>
-      </form>
-
-      <p class="text-center mt-3">
-        Don't have an account?
-        <router-link to="/register" class="sign-up-link">Sign Up</router-link>
-      </p>
-
-      <p v-if="error" class="text-danger text-center mt-2">{{ error }}</p>
-    </div>
-  </div>
-</template>
-
 <style scoped>
-.login-page .card {
-  border-radius: 12px;
-  padding: 2rem;
-  margin: 1rem;
-  max-width: 400px;
-}
-
-.title {
-  font-weight: 700;
-}
-
-.remember-label {
-  color: var(--color-dark);
-}
-
-.form-check-input:checked {
-  width: 18px;
-  height: 18px;
-  background-color: var(--color-dark);
-  box-shadow: none;
-  border: var(--color-dark);
-}
-
-input[type="checkbox"] {
-  box-shadow: none;
-}
-
-input::placeholder {
-  color: #999;
-}
-
-.forgot-link {
-  color: var(--color-dark);
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.forgot-link:hover {
-  text-decoration: underline;
-}
-
-.sign-up-link {
-  text-decoration: none;
-  color: var(--color-dark);
-  font-weight: 500;
-}
-
-.sign-up-link:hover {
-  text-decoration: underline;
-  color: var(--color-dark);
-}
-
-.position-relative {
-  position: relative;
-}
-
-.toggle-password-icon {
-  position: absolute;
-  right: 12px;       
-  top: 50%;
-  cursor: pointer;
-  font-size: 1.1rem;
-  color: #555;
-  z-index: 10;
-}
 
 </style>

@@ -6,10 +6,13 @@ import ForgotPassword from "../views/ForgotPassword.vue";
 import ResetPassword from "../views/ResetPassword.vue";
 import Meals from "../views/Meals.vue";
 import Workouts from "../views/Workouts.vue";
-import Profile from "../views/Profile.vue"; 
-import Achievements from '../views/Achievements.vue';
+import Profile from "../views/Profile.vue";
+import Achievements from "../views/Achievements.vue";
+import WaterTracker from "../views/WaterTracker.vue";
+import SleepTracker from "../views/SleepTracker.vue";
 
 const routes = [
+  // ADD PATH FOR HOME PAGE LATER
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
@@ -17,8 +20,10 @@ const routes = [
   { path: "/workouts", component: Workouts, meta: { requiresAuth: true } },
   { path: "/forgot-password", component: ForgotPassword },
   { path: "/reset-password/:token", component: ResetPassword },
-  { path: "/profile", component: Profile },
-  { path: '/achievements', component: Achievements },
+  { path: "/profile", component: Profile, meta: { requiresAuth: true } },
+  { path: "/achievements", component: Achievements, meta: { requiresAuth: true } },
+  { path: "/water", component: WaterTracker, meta: { requiresAuth: true }},
+  { path: "/sleep", component: SleepTracker, meta: { requiresAuth: true } }
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

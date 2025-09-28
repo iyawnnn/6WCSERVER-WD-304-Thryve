@@ -1,103 +1,98 @@
 <template>
-  <div class="container py-3">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2>Welcome back, {{ userName }}</h2>
-      <button class="btn btn-outline-danger btn-sm" @click="logout">
-        <i class="bi bi-box-arrow-right me-1"></i> Logout
+  <DefaultLayout v-slot="{ toggleSidebar }">
+    <!-- Page Header -->
+    <div class="page-header">
+      <button @click="toggleSidebar" class="sidebar-toggle">
+       <i class="bi bi-layout-sidebar"></i>
       </button>
+
+      <div class="separator"></div>
+      <!-- line -->
+      <span class="page-title">Dashboard</span>
     </div>
 
-    <!-- Stat Cards -->
-    <div class="row g-3 mt-3">
-      <div
-        class="col-sm-6 col-md-4"
-        v-for="card in statCards"
-        :key="card.title"
-      >
-        <div class="card p-3 h-100">
-          <div class="card-body">
-            <h6 class="card-title">{{ card.title }}</h6>
-            <p class="display-6 mb-0">{{ card.value }}</p>
-            <small v-if="card.note" class="text-muted">{{ card.note }}</small>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Weekly Chart -->
-    <div class="card mt-4 p-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h5 class="mb-0">
-            Last 7 days <small class="text-muted">({{ weekStartLabel }})</small>
-          </h5>
-        </div>
-        <div>
-          <p v-if="weekRange" class="mb-0">
-            <small>Week: {{ weekRange }}</small>
+    <div class="dashboard-body">
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div
+          v-for="card in statCards"
+          :key="card.title"
+          class="rounded-lg border p-4 shadow-sm bg-card"
+        >
+          <h6 class="text-sm font-medium">{{ card.title }}</h6>
+          <p class="text-2xl font-semibold mt-1">{{ card.value }}</p>
+          <p v-if="card.note" class="text-xs text-muted mt-1">
+            {{ card.note }}
           </p>
         </div>
       </div>
 
-      <div style="height: 300px" class="mt-3">
-        <canvas ref="chartRef"></canvas>
-      </div>
-
-      <div class="mt-2">
-        <small class="text-muted">
+      <!-- Weekly Chart -->
+      <div class="rounded-lg border p-4 shadow-sm bg-card mt-6">
+        <div class="flex items-center justify-between">
+          <h5 class="text-base font-medium">
+            Last 7 days
+            <span class="text-muted text-sm">({{ weekStartLabel }})</span>
+          </h5>
+          <p v-if="weekRange" class="text-xs text-muted">
+            Week: {{ weekRange }}
+          </p>
+        </div>
+        <div class="h-72 mt-3">
+          <canvas ref="chartRef"></canvas>
+        </div>
+        <p class="text-xs text-muted mt-2">
           Avg burned: {{ avg("burned") }}, Avg eaten: {{ avg("eaten") }}
-        </small>
+        </p>
+      </div>
+
+      <!-- Daily Goals -->
+      <div class="rounded-lg border p-4 shadow-sm bg-card space-y-3 mt-6">
+        <h6 class="text-sm font-medium">Daily Goals</h6>
+
+        <div>
+          <label class="block text-xs mb-1">Calories</label>
+          <progress
+            :value="today.progress.calories"
+            max="100"
+            class="w-full"
+          ></progress>
+          <p class="text-xs text-muted">
+            {{ today.caloriesEaten }} / {{ today.goals.calories }} kcal ({{
+              today.progress.calories
+            }}%)
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs mb-1">Workout Minutes</label>
+          <progress
+            :value="today.progress.workoutMinutes"
+            max="100"
+            class="w-full"
+          ></progress>
+          <p class="text-xs text-muted">
+            {{ today.workoutMinutes }} / {{ today.goals.workoutMinutes }} mins
+            ({{ today.progress.workoutMinutes }}%)
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-xs mb-1">Protein</label>
+          <progress
+            :value="today.progress.protein"
+            max="100"
+            class="w-full"
+          ></progress>
+          <p class="text-xs text-muted">
+            {{ today.proteinEaten }} / {{ today.goals.protein }} g ({{
+              today.progress.protein
+            }}%)
+          </p>
+        </div>
       </div>
     </div>
-
-    <!-- Daily Goals Progress -->
-    <div class="card mt-3 p-3">
-      <h6>Daily Goals</h6>
-
-      <div class="mb-2">
-        <label class="form-label mb-1">Calories</label>
-        <progress
-          :value="today.progress.calories"
-          max="100"
-          class="w-100"
-        ></progress>
-        <small>
-          {{ today.caloriesEaten }} / {{ today.goals.calories }} kcal ({{
-            today.progress.calories
-          }}%)
-        </small>
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label mb-1">Workout Minutes</label>
-        <progress
-          :value="today.progress.workoutMinutes"
-          max="100"
-          class="w-100"
-        ></progress>
-        <small>
-          {{ today.workoutMinutes }} / {{ today.goals.workoutMinutes }} mins ({{
-            today.progress.workoutMinutes
-          }}%)
-        </small>
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label mb-1">Protein</label>
-        <progress
-          :value="today.progress.protein"
-          max="100"
-          class="w-100"
-        ></progress>
-        <small>
-          {{ today.proteinEaten }} / {{ today.goals.protein }} g ({{
-            today.progress.protein
-          }}%)
-        </small>
-      </div>
-    </div>
-  </div>
+  </DefaultLayout>
 </template>
 
 <script setup>
@@ -108,6 +103,7 @@ import { getWeekRange } from "../utils/dateHelpers";
 import dashboardService from "../services/dashboardService";
 import { meals, fetchMeals } from "../composables/useMeals.js";
 import { Chart, registerables } from "chart.js";
+import DefaultLayout from "../components/Layout/DefaultLayout.vue";
 
 Chart.register(...registerables);
 
@@ -142,22 +138,6 @@ const statCards = computed(() => [
   { title: "Calories Eaten Today", value: today.value.caloriesEaten },
   { title: "Net Calories", value: today.value.net, note: "Eaten - Burned" },
 ]);
-
-function logout() {
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("token");
-  router.push("/login");
-}
-
-async function setWeekStart(value) {
-  try {
-    await api.put("/user/preferences", { weekStart: value });
-    weekStart.value = value;
-    await loadWeekly();
-  } catch (err) {
-    console.error(err);
-  }
-}
 
 // Compute today's totals from meals
 function computeMealTotals() {
@@ -262,8 +242,4 @@ onMounted(async () => {
 watch(weekly, () => buildChart(), { deep: true });
 </script>
 
-<style scoped>
-.display-6 {
-  font-size: 1.8rem;
-}
-</style>
+<style scoped></style>

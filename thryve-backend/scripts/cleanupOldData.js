@@ -58,3 +58,4 @@ async function cleanupOldData() {
 }
 
 cleanupOldData();
+// node scripts/cleanupOldData.js

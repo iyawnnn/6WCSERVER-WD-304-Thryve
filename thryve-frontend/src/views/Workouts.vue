@@ -1,28 +1,34 @@
 <template>
-  <div>
-    <h2>Workouts</h2>
+  <DefaultLayout v-slot="{ toggleSidebar }">
+    <!-- Page Header -->
+    <div class="page-header">
+      <button @click="toggleSidebar" class="sidebar-toggle">
+        <i class="bi bi-layout-sidebar"></i>
+      </button>
 
-    <section>
-      <h3>Add a Workout</h3>
-      <WorkoutForm />
-    </section>
+      <div class="separator"></div>
+      <!-- line -->
+      <span class="page-title">Workout</span>
+    </div>
 
-    <section>
-      <WorkoutHistory />
-    </section>
-  </div>
+    <div class="dashboard-body">
+      <section>
+        <h3>Add a Workout</h3>
+        <WorkoutForm />
+      </section>
+
+      <section>
+        <WorkoutHistory />
+      </section>
+    </div>
+  </DefaultLayout>
 </template>
 
 <script setup>
 import WorkoutForm from "../components/WorkoutForm.vue";
 import WorkoutHistory from "../components/WorkoutHistory.vue";
+import DefaultLayout from "../components/Layout/DefaultLayout.vue";
 </script>
 
 <style scoped>
-h2, h3 {
-  margin-bottom: 0.5rem;
-}
-section {
-  margin-bottom: 1.5rem;
-}
 </style>

@@ -5,8 +5,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "lint": "eslint .",
-    "seed": "node src/scripts/seed/seedPhase2.js"
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",

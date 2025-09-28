@@ -3,18 +3,12 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const Preferences = require("../models/Preferences");
-const Meal = require("../models/Meal");
-const Workout = require("../models/Workout");
-const UserAchievement = require("../models/UserAchievement");
-const Progress = require("../models/Progress");
 
 // GET current preferences
 router.get("/preferences", authMiddleware, async (req, res) => {
   try {
     let prefs = await Preferences.findOne({ userId: req.user.userId });
-    if (!prefs) {
-      prefs = await Preferences.create({ userId: req.user.userId });
-    }
+    if (!prefs) prefs = await Preferences.create({ userId: req.user.userId });
     res.json({
       dailyCaloriesGoal: prefs.dailyCaloriesGoal,
       dailyProteinGoal: prefs.dailyProteinGoal,
@@ -29,16 +23,10 @@ router.get("/preferences", authMiddleware, async (req, res) => {
 // UPDATE preferences
 router.put("/preferences", authMiddleware, async (req, res) => {
   try {
-    const { dailyCaloriesGoal, dailyProteinGoal, dailyWorkoutMinutesGoal } =
-      req.body;
+    const { dailyCaloriesGoal, dailyProteinGoal, dailyWorkoutMinutesGoal } = req.body;
     const prefs = await Preferences.findOneAndUpdate(
       { userId: req.user.userId },
-      {
-        dailyCaloriesGoal,
-        dailyProteinGoal,
-        dailyWorkoutMinutesGoal,
-        updatedAt: new Date(),
-      },
+      { dailyCaloriesGoal, dailyProteinGoal, dailyWorkoutMinutesGoal, updatedAt: new Date() },
       { new: true, upsert: true }
     );
     res.json(prefs);
@@ -48,7 +36,7 @@ router.put("/preferences", authMiddleware, async (req, res) => {
   }
 });
 
-// GET current user's profile
+// GET user profile
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId || req.user.id || req.user._id;
@@ -61,7 +49,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
   }
 });
 
-// Update profile (age, weight, height)
+// UPDATE profile
 router.put("/profile", authMiddleware, async (req, res) => {
   try {
     const { age, weight, height } = req.body;
@@ -81,22 +69,15 @@ router.put("/profile", authMiddleware, async (req, res) => {
   }
 });
 
+// DELETE user (triggers cascade delete)
 router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    const userId = req.params.id;
-
-    // Delete user
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Cascade delete related data
-    await Preferences.deleteOne({ userId });
-    await Meal.deleteMany({ userId });
-    await Workout.deleteMany({ userId });
-    await UserAchievement.deleteMany({ userId });
-    await Progress.deleteMany({ userId });
+    await user.deleteOne(); // cascade middleware runs automatically
 
-    res.json({ message: "User and all related data deleted" });
+    res.json({ message: "User and all related data deleted automatically." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
