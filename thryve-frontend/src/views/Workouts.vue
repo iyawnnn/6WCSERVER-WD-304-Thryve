@@ -5,7 +5,6 @@
       <button @click="toggleSidebar" class="sidebar-toggle">
         <i class="bi bi-layout-sidebar"></i>
       </button>
-
       <div class="separator"></div>
       <!-- line -->
       <span class="page-title">Workout</span>

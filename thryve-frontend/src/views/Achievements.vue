@@ -5,7 +5,6 @@
       <button @click="toggleSidebar" class="sidebar-toggle">
         <i class="bi bi-layout-sidebar"></i>
       </button>
-
       <div class="separator"></div>
       <span class="page-title">Achievements</span>
     </div>
@@ -18,15 +17,18 @@
           class="achievement-card"
           :class="{ unlocked: unlockedTypes.includes(ach.type.toLowerCase()) }"
         >
-          <img :src="ach.iconUrl" :alt="ach.name" />
-          <p class="achievement-name">{{ ach.name }}</p>
-          <p class="achievement-desc">{{ ach.description }}</p> 
+          <div class="icon-wrapper">
+            <img :src="ach.iconUrl" :alt="ach.name" class="achievement-icon" />
+          </div>
+          <div class="text-wrapper">
+            <p class="achievement-name">{{ ach.name }}</p>
+            <p class="achievement-desc">{{ ach.description }}</p>
+          </div>
         </div>
       </div>
     </div>
   </DefaultLayout>
 </template>
-
 
 <script setup>
 import { ref, watch, onMounted } from "vue";
@@ -47,7 +49,6 @@ const fetchMasterAchievements = async () => {
       ...a,
       type: a.type.trim().toLowerCase(),
     }));
-    console.log("Master achievements loaded:", achievementsList.value);
   } catch (err) {
     console.error(
       "Error fetching master achievements:",
@@ -57,25 +58,18 @@ const fetchMasterAchievements = async () => {
 };
 
 const fetchUserAchievements = async () => {
-  if (!auth.user?._id) {
-    console.warn("No user logged in, skipping user achievements");
-    return;
-  }
+  if (!auth.user?._id) return;
   try {
-    // Check user achievements first
     await api.post(
       `/achievements/check/${auth.user._id}`,
       {},
       { headers: { Authorization: `Bearer ${auth.token}` } }
     );
-    console.log("User achievements checked");
 
-    // Fetch unlocked achievements
     const { data } = await api.get(`/achievements/${auth.user._id}`, {
       headers: { Authorization: `Bearer ${auth.token}` },
     });
     unlockedTypes.value = data.map((a) => a.type.trim().toLowerCase());
-    console.log("User unlocked types:", unlockedTypes.value);
   } catch (err) {
     console.error(
       "Error fetching user achievements:",
@@ -89,7 +83,6 @@ const init = async () => {
   await fetchUserAchievements();
 };
 
-// Watch for user changes
 watch(
   () => auth.user,
   (newUser) => {
@@ -102,47 +95,79 @@ onMounted(init);
 </script>
 
 <style>
-.achievements-page {
-  padding: 2rem;
-}
-
 .achievement-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.2rem;
+  padding: 1rem 0;
 }
 
+/* Card */
 .achievement-card {
-  width: 140px;
-  height: 180px; /* slightly taller to fit description */
-  border: 1px solid #ccc;
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
   text-align: center;
   padding: 1rem;
-  opacity: 0.3;
-  transition: 0.2s;
-}
-
-.achievement-card img {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 0.5rem;
-}
-
-.achievement-name {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.achievement-desc {
-  font-size: 0.8rem;
-  color: #555;
+  opacity: 0.35;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .achievement-card.unlocked {
   opacity: 1;
-  border-color: #4caf50;
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  border: 1px solid #4caf50;
+  background: linear-gradient(145deg, #e8ffe8 0%, #f8fff8 100%);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
 }
 
+.achievement-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+/*badge-sized icons */
+.achievement-icon {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.text-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex-grow: 1;
+}
+
+/* Text Design */
+.achievement-name {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: #333;
+  word-wrap: break-word;
+}
+
+.achievement-desc {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.3;
+  max-height: 2.9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 </style>
