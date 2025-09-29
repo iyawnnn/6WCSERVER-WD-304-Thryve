@@ -1,10 +1,13 @@
 <template>
   <div class="layout">
     <!-- Sidebar -->
-    <AppSidebar :class="{ collapsed: isCollapsed }" />
-    
+    <AppSidebar :class="{ open: isOpen }" />
+
+    <!-- Overlay (tablet/mobile only) -->
+    <div v-if="isOpen && isMobile" class="overlay" @click="toggleSidebar"></div>
+
     <!-- Main Content -->
-    <main :class="{ 'full-width': isCollapsed }" class="main-content">
+    <main :class="{ 'full-width': !isOpen && !isMobile }" class="main-content">
       <div class="content-body">
         <slot :toggleSidebar="toggleSidebar" />
       </div>
@@ -19,14 +22,29 @@ export default {
   components: { AppSidebar },
   data() {
     return {
-      isCollapsed: false,
-      sidebarWidth: 288, // 18rem in px
+      isOpen: window.innerWidth > 1024,
+      isMobile: window.innerWidth <= 1024,
     };
   },
   methods: {
     toggleSidebar() {
-      this.isCollapsed = !this.isCollapsed;
+      this.isOpen = !this.isOpen;
     },
+    handleResize() {
+      this.isMobile = window.innerWidth <= 1024;
+      if (!this.isMobile) {
+        this.isOpen = true;
+      } else {
+        this.isOpen = false;
+      }
+    },
+  },
+  mounted() {
+    this.handleResize();
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.handleResize);
   },
 };
 </script>
@@ -40,23 +58,20 @@ export default {
   position: relative;
 }
 
-/* Sidebar is handled inside AppSidebar */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   padding: 1rem;
-  transition: margin-left 0.3s ease, width 0.3s ease;
-  margin-left: 18rem; /* match sidebar width */
+  transition: margin-left 0.3s ease;
+  margin-left: 18rem;
 }
 
-/* When sidebar is collapsed, expand main fully */
 .main-content.full-width {
   margin-left: 0;
 }
 
-/* Content body */
 .content-body {
   background: #fff;
   flex: 1;
@@ -64,5 +79,46 @@ export default {
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 15;
+}
+
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .main-content {
+    margin-left: 14rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .content-body {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .main-content {
+    margin-left: 12rem; /* match the smaller sidebar */
+    padding: 0.5rem;
+  }
+
+  .content-body {
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
 }
 </style>

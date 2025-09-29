@@ -8,6 +8,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import PrimeVue from 'primevue/config';
 import { definePreset } from '@primeuix/themes';
 import Nora from '@primeuix/themes/nora';
+import VueApexCharts from "vue3-apexcharts";
 
 // PrimeVue CSS
 import 'primeicons/primeicons.css';
@@ -49,6 +50,7 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 app.use(PrimeVue, { theme: { preset: MyPreset } });
+app.use(VueApexCharts);
 
 // Fetch user if token exists
 import { useAuthStore } from './stores/auth';

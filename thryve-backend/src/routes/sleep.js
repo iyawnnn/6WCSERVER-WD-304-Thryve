@@ -44,19 +44,22 @@ router.get("/weekly", authMiddleware, async (req, res) => {
   }
 });
 
-// Optionally: get today's sleep
+
 router.get("/today", authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const log = await SleepLog.findOne({ userId, date: { $gte: today } }).lean();
-    res.json(log || {});
+    const logs = await SleepLog.find({ userId, date: { $gte: today } }).lean();
+    const totalMins = logs.reduce((sum, log) => sum + (log.duration || 0), 0);
+
+    res.json({ duration: totalMins, date: today });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch today's sleep" });
   }
 });
+
 
 module.exports = router;

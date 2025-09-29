@@ -48,7 +48,7 @@ function logout() {
 <style scoped>
 .sidebar {
   width: 18rem;
-  position: absolute; 
+  position: fixed;
   left: 0;
   top: 0;
   bottom: 0;
@@ -56,13 +56,19 @@ function logout() {
   display: flex;
   flex-direction: column;
   padding: 1.25rem;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.3s ease;
+  z-index: 20;
+  transform: translateX(-100%);
 }
 
 .sidebar.collapsed {
   transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
+}
+
+.sidebar.open {
+  transform: translateX(0);
 }
 
 .content-body {
@@ -142,5 +148,69 @@ function logout() {
   line-height: 1.2;     
 }
 
+@media (min-width: 1201px) {
+  .sidebar {
+    width: 18rem; 
+  }
+}
+
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .sidebar {
+    width: 14rem; 
+  }
+}
+
+@media (min-width: 1025px) {
+  .sidebar {
+    transform: translateX(0);
+  }
+  .sidebar:not(.open) {
+    transform: translateX(-100%);
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.collapsed {
+    transform: translateX(0);
+  }
+}
+
+/* Extra small devices: ≤500px */
+@media (max-width: 500px) {
+  .sidebar {
+    width: 14.5rem; 
+    padding: 1rem 1rem;
+  }
+
+  .sidebar-header .logo {
+    max-width: 100px; 
+  }
+
+  .nav-link {
+    padding: 0.4rem 0.6rem; 
+    font-size: 0.8rem; 
+    gap: 0.5rem; 
+  }
+
+  .nav-extra .nav-link {
+    font-size: 0.8rem; 
+  }
+
+  .nav-user .avatar {
+    width: 32px; 
+    height: 32px;
+  }
+
+  .nav-user .name {
+    font-size: 0.85rem;
+  }
+
+  .nav-user .email {
+    font-size: 0.65rem;
+  }
+}
 
 </style>

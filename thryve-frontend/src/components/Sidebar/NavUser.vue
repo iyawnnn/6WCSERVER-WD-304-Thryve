@@ -32,7 +32,7 @@ const defaultAvatar = "https://i.pravatar.cc/40?img=12";
 .avatar {
   width: 40px;
   height: 40px;
-  border-radius: 16px; 
+  border-radius: 16px;
   object-fit: cover;
 }
 
@@ -51,5 +51,26 @@ const defaultAvatar = "https://i.pravatar.cc/40?img=12";
   font-size: 0.8rem;
   color: #64748b;
   margin: 0;
+}
+
+/* Smaller avatar and font for 1200px and below */
+@media (max-width: 1200px) {
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .name {
+    font-size: 0.9rem;
+  }
+
+  .email {
+    font-size: 0.7rem;
+  }
+
+  .nav-user {
+    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
+  }
 }
 </style>

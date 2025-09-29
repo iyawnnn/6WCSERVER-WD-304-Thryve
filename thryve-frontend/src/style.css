@@ -21,6 +21,8 @@
   --secondary-foreground: hsl(0, 0%, 9%);
   --secondary-hover: hsl(0, 0%, 33%);
   --third-hover: #e0e0e0;
+  --light-dark: hsl(0, 0%, 25%);       
+  --light-dark-hover: hsl(0, 0%, 15%); 
 
   /* Muted & Accent */
   --muted: hsl(0, 0%, 96.1%);
@@ -38,6 +40,7 @@
   --border: hsl(0, 0%, 89.8%);
   --input: hsl(0, 0%, 89.8%);
   --ring: hsl(0, 0%, 3.9%);
+  --ring-2: #c9ced1;
 
   /* Charts */
   --chart-1: hsl(12, 76%, 61%);
@@ -331,6 +334,16 @@ input:-webkit-autofill:active {
 .page-title {
   font-weight: 500;
   font-size: 1.25rem;
+}
+
+::selection {
+  background: black;
+  color: white;
+}
+
+::-moz-selection {
+  background: black;
+  color: white;
 }
 
 /* Responsive */
