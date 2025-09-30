@@ -203,6 +203,8 @@ import { getWeekRange } from "../utils/dateHelpers"; // Helper function
 import { meals, fetchMeals } from "../composables/useMeals.js"; // Meal composable
 import sleepService from "@/services/sleepService"; // Sleep API service
 import waterService from "@/services/waterService"; // Water API service
+import { workouts, fetchWorkouts } from "../composables/useWorkouts.js";
+
 
 // Register Chart.js modules
 Chart.register(...registerables);
@@ -417,58 +419,67 @@ function avg(key) {
 // ---- Fetch today's stats ----
 async function loadToday() {
   try {
-    // Fetch meals first
+    // Fetch meals + workouts
     await fetchMeals();
+    await fetchWorkouts();
+
     const res = await dashboardService.getToday();
     const data = res.data || {};
 
-    console.log("getToday response:", res.data);
+    console.log("getToday response:", data);
 
-    // Merge with meal totals
+    // ---- Meals totals ----
     const mealTotals = {
       caloriesEaten: meals.value.reduce((sum, m) => sum + (m.calories || 0), 0),
       proteinEaten: meals.value.reduce((sum, m) => sum + (m.protein || 0), 0),
     };
 
+    // ---- Workout totals ----
+    const workoutTotals = {
+      caloriesBurned: workouts.value.reduce((sum, w) => sum + (w.calories || 0), 0),
+      workoutMinutes: workouts.value.reduce((sum, w) => sum + (w.duration || 0), 0),
+    };
+
+    // Merge priorities: API > meals/workouts fallback
     data.caloriesEaten = data.caloriesEaten ?? mealTotals.caloriesEaten ?? 0;
     data.proteinEaten = data.proteinEaten ?? mealTotals.proteinEaten ?? 0;
+    data.caloriesBurned = data.caloriesBurned ?? workoutTotals.caloriesBurned ?? 0;
+    data.workoutMinutes = data.workoutMinutes ?? workoutTotals.workoutMinutes ?? 0;
+
+    // Calculate net
     data.net =
-      (data.goals?.calories ?? 0) -
+      (data.goals?.calories ?? 2000) -
       (data.caloriesEaten ?? 0) +
       (data.caloriesBurned ?? 0);
 
-    // Fetch sleep data
+    // Sleep + water
     try {
       const sleepRes = await sleepService.getToday();
       data.sleepDuration = sleepRes.data?.duration ?? 0;
-    } catch (e) {
-      console.warn("Sleep fetch failed:", e);
+    } catch {
       data.sleepDuration = 0;
     }
 
-    // Fetch water data
     try {
       const waterRes = await waterService.getToday();
       data.water = waterRes.data?.amount ?? 0;
-    } catch (e) {
-      console.warn("Water fetch failed:", e);
+    } catch {
       data.water = 0;
     }
 
-    // Guarantee defaults
-    data.caloriesBurned = data.caloriesBurned ?? 0;
+    // Defaults
     data.goals = data.goals ?? {
       calories: 2000,
       protein: 150,
       workoutMinutes: 60,
     };
 
-    // Update reactive today object
     today.value = { ...today.value, ...data };
   } catch (err) {
     console.error("loadToday error:", err);
   }
 }
+
 
 // ---- Fetch weekly stats ----
 async function loadWeekly() {
