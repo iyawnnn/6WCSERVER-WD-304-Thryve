@@ -6,17 +6,15 @@
         <i class="bi bi-layout-sidebar"></i>
       </button>
       <div class="separator"></div>
+      <!-- line -->
       <span class="page-title">Workout</span>
     </div>
 
-    <!-- Grid Layout -->
-    <div class="grid-layout">
-      <!-- Left side: Form + History -->
-      <div class="left-panel">
-        <section class="card">
-          <h3>Add a Workout</h3>
-          <WorkoutForm />
-        </section>
+    <div class="dashboard-body">
+      <section>
+        <h3>Add a Workout</h3>
+        <WorkoutForm />
+      </section>
 
         <section class="card">
           <WorkoutHistory />
@@ -55,8 +53,6 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch, onUnmounted } from "vue";
-import Chart from "chart.js/auto";
 import WorkoutForm from "../components/WorkoutForm.vue";
 import WorkoutHistory from "../components/WorkoutHistory.vue";
 import DefaultLayout from "../components/Layout/DefaultLayout.vue";
@@ -216,6 +212,7 @@ onUnmounted(() => {
   grid-column: span 2;
 }
 
+
 .summary-box {
   background: var(--muted);
   padding: 1rem;
@@ -244,4 +241,7 @@ onUnmounted(() => {
   width: 100% !important;
   height: 100% !important;
 }
+
+
+
 </style>
