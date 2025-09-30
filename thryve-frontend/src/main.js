@@ -13,6 +13,8 @@ import VueApexCharts from "vue3-apexcharts";
 // PrimeVue CSS
 import 'primeicons/primeicons.css';
 import './style.css';
+import ToastService from 'primevue/toastservice'
+import Toast from 'primevue/toast'
 
 // Map your CSS variables to a preset
 const MyPreset = definePreset(Nora, {
@@ -51,6 +53,10 @@ app.use(pinia);
 app.use(router);
 app.use(PrimeVue, { theme: { preset: MyPreset } });
 app.use(VueApexCharts);
+
+// Primevue notif
+app.use(ToastService)        
+app.component('Toast', Toast) 
 
 // Fetch user if token exists
 import { useAuthStore } from './stores/auth';

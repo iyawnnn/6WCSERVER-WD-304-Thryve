@@ -24,6 +24,8 @@ export default {
     return {
       isOpen: window.innerWidth > 1024,
       isMobile: window.innerWidth <= 1024,
+      isCollapsed: false,
+      sidebarWidth: 288, 
     };
   },
   methods: {

@@ -48,6 +48,19 @@
   --chart-3: hsl(197, 37%, 24%);
   --chart-4: hsl(43, 74%, 66%);
   --chart-5: hsl(27, 87%, 67%);
+
+  /* Cascade Date & Select Color Change */
+  --p-list-option-selected-background: black !important;
+  --p-list-option-selected-focus-background: #333 !important;
+  --p-list-option-selected-color: white !important;
+  --p-datepicker-date-selected-background: black !important;
+  --p-datepicker-date-range-selected-background: black !important;
+  --p-datepicker-date-selected-color: white !important;
+  --p-datepicker-date-range-selected-color: white !important;
+  --p-cascadeselect-focus-ring-color: 1px solid var(--border) !important;
+  --p-inputtext-focus-ring-color: 1px solid !important;
+  --p-paginator-nav-button-selected-background: black !important;
+  --p-form-field-focus-ring-color: transparent !important;
 }
 
 /* Reset & base styles */
@@ -344,6 +357,23 @@ input:-webkit-autofill:active {
 ::-moz-selection {
   background: black;
   color: white;
+
+}
+
+/* Workouts Paginator Border */
+.p-paginator .p-select {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* If your <style> is scoped */
+:deep(.p-paginator .p-select) {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
 }
 
 /* Responsive */
