@@ -1,78 +1,161 @@
 <script setup>
-import { ref } from "vue";
-import api from "../utils/api";
-import { workouts } from "../composables/useWorkouts.js";
+import { ref, computed } from "vue";
+import { useToast } from "primevue/usetoast";  // ✅ import toast
+import { workouts, addWorkout, fetchWorkouts } from "../composables/useWorkouts.js";
+import { workoutOptions } from "../composables/useWorkoutOptions.js";
+import { calculateCalories } from "../utils/calcCalories";
+import { useAuthStore } from "../stores/auth";
+import CascadeSelect from "primevue/cascadeselect";
+import DatePicker from "primevue/datepicker";
 
-const type = ref("");
+const toast = useToast(); // ✅ toast instance
+
+const auth = useAuthStore();
+const userWeight = computed(() => auth.user?.weight);
+
+const type = ref(null);
 const duration = ref("");
-const calories = ref("");
-const date = ref(new Date().toISOString().split("T")[0]);
+const date = ref(new Date());
+const today = new Date();
+const isLoading = ref(false);
 
-const today = date.value;
+const stripTime = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-const addWorkout = async () => {
-  if (!type.value.trim()) {
-    alert("Please enter a workout type.");
-    return;
+const calories = computed(() => {
+  if (!type.value || !duration.value || duration.value <= 0 || !userWeight.value) {
+    return 0;
   }
-  if (!/^[A-Za-z\s\-]+$/.test(type.value.trim())) {
-    alert("Workout type must contain only letters, spaces, or hyphens.");
+  try {
+    const workoutKey = type.value.name.replace(/\s|\(|\)/g, "");
+    const result = calculateCalories(workoutKey, duration.value, userWeight.value);
+    return isNaN(result) ? 0 : Math.round(result);
+  } catch (error) {
+    console.error("Calories calculation error:", error);
+    return 0;
+  }
+});
+
+const addWorkoutHandler = async () => {
+  if (!type.value) {
+    toast.add({ severity: "warn", summary: "Missing Data", detail: "Please select a workout type.", life: 3000 });
     return;
   }
   if (!duration.value || duration.value < 1) {
-    alert("Duration must be 1 minute or higher.");
-    return;
-  }
-  if (!calories.value || calories.value < 1) {
-    alert("Calories burned must be 1 or higher.");
+    toast.add({ severity: "warn", summary: "Invalid Duration", detail: "Duration must be 1 minute or higher.", life: 3000 });
     return;
   }
   if (!date.value) {
-    alert("Please select a date.");
+    toast.add({ severity: "warn", summary: "Missing Date", detail: "Please select a workout date.", life: 3000 });
     return;
   }
-  if (new Date(date.value) > new Date(today)) {
-    alert("Date cannot be in the future.");
+  if (stripTime(date.value) > stripTime(today)) {
+    toast.add({ severity: "warn", summary: "Invalid Date", detail: "Date cannot be in the future.", life: 3000 });
     return;
   }
+
+  isLoading.value = true;
 
   try {
-    const res = await api.post("/workouts", {
-      type: type.value.trim(),
+    const workoutData = {
+      type: type.value.name.trim(),
       duration: Number(duration.value),
       calories: Number(calories.value),
-      date: new Date(date.value),
-    });
+      date: `${date.value.getFullYear()}-${(date.value.getMonth() + 1).toString().padStart(2, "0")}-${date.value.getDate().toString().padStart(2, "0")}`,
+    };
 
-    // ✅ add to reactive workouts array
-    workouts.value.unshift(res.data);
+    console.log("Adding workout:", workoutData);
 
-    type.value = "";
+    const created = await addWorkout(workoutData);
+    if (created && String(created._id).startsWith("local_")) {
+      try { await fetchWorkouts(); } catch (e) { console.warn("Re-sync failed:", e); }
+    }
+
+    toast.add({ severity: "success", summary: "Workout Added", detail: "Your workout was saved successfully.", life: 3000 });
+
+    // Reset form
+    type.value = null;
     duration.value = "";
-    calories.value = "";
-    date.value = today;
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    alert("Failed to add workout. Check your inputs.");
+    date.value = new Date();
+
+  } catch (error) {
+    console.error("Add workout error:", error);
+    toast.add({ severity: "error", summary: "Failed", detail: "Could not add workout. Try again.", life: 3000 });
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
 
+
 <template>
-  <form @submit.prevent="addWorkout">
-    <div class="mb-2">
-      <input v-model="type" placeholder="Workout type" required />
+  <form @submit.prevent="addWorkoutHandler" class="form-grid">
+    <!-- Row 1: Workout Type + Duration + Date -->
+    <div class="form-row three-cols">
+      <div class="input-group">
+        <label class="input-label">Workout Type</label>
+        <CascadeSelect 
+          v-model="type" 
+          :options="workoutOptions" 
+          optionLabel="name" 
+          optionGroupLabel="name" 
+          :optionGroupChildren="['activities']" 
+          class="w-full" 
+          placeholder="Select Workout"
+          :disabled="isLoading"
+        />
+      </div>
+      <div class="input-group">
+        <label class="input-label">Duration (min)</label>
+        <input 
+          v-model.number="duration" 
+          type="number" 
+          min="1" 
+          required 
+          placeholder="Enter duration"
+          :disabled="isLoading"
+        />
+      </div>
+      <div class="input-group">
+        <label class="input-label">Workout Date</label>
+        <DatePicker 
+          v-model="date" 
+          showIcon 
+          :maxDate="today" 
+          dateFormat="yy-mm-dd" 
+          placeholder="Select Date" 
+          class="w-full"
+          :disabled="isLoading"
+        />
+      </div>
     </div>
-    <div class="mb-2">
-      <input v-model.number="duration" type="number" placeholder="Duration (min)" min="1" required />
+    
+    <!-- Row 2: Calories Burned -->
+    <div class="form-row">
+      <div class="input-group full">
+        <label class="input-label">Calculated Calories Burned</label>
+        <input 
+          :value="calories" 
+          type="number" 
+          readonly 
+          class="calories-output"
+          :class="{ 'zero-calories': calories === 0 }"
+        />
+        <small v-if="calories === 0 && (type || duration)" class="calories-hint">
+          Select workout type and duration to calculate calories
+        </small>
+      </div>
     </div>
-    <div class="mb-2">
-      <input v-model.number="calories" type="number" placeholder="Calories burned" min="1" required />
+    
+    <!-- Row 3: Button -->
+    <div class="form-row">
+      <button 
+        type="submit" 
+        class="btn-submit"
+        :disabled="isLoading || calories === 0"
+      >
+        {{ isLoading ? "Adding..." : "Add Workout" }}
+      </button>
     </div>
-    <div class="mb-2">
-      <input v-model="date" type="date" :max="today" required />
-    </div>
-    <button type="submit">Add Workout</button>
   </form>
 </template>
 
@@ -280,13 +363,4 @@ input:focus {
   box-shadow: none !important;
 }
 
-
-
-
 </style>
-
-
-
-
-
-

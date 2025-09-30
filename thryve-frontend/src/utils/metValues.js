@@ -1,6 +1,6 @@
 export const MET_VALUES = {
-  Running: 9.0,
-  Jogging: 7.0,
+  Running: 9.0,           
+  Jogging: 7.0,            
   CyclingModerate: 7.0,
   Swimming: 8.0,
   JumpRope: 10.5,

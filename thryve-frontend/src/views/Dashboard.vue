@@ -176,13 +176,11 @@
               </div>
             </div>
 
-            <!-- Progress bar -->
-            <div class="goal-progress w-[300px]">
-              <ProgressBar :value="Math.min(goal.progress, 100)" showValue>
+            <!-- Progress bar (PrimeVue component) -->
+            <div class="goal-progress">
+              <ProgressBar :value="goal.progress" showValue>
                 <template #value>
-                  <div class="progress-label-wrapper">
-                    {{ Math.min(goal.progress, 100) }}%
-                  </div>
+                  <div class="progress-label-wrapper">{{ goal.progress }}%</div>
                 </template>
               </ProgressBar>
             </div>
@@ -706,36 +704,36 @@ watch(weekly, () => buildChart(), { deep: true });
   font-size: 0.75rem;
   font-weight: 600;
   color: #fff;
-  white-space: nowrap;
+  white-space: nowrap; 
 }
 
 :deep(.p-progressbar) {
-  height: 12px;
+  height: 12px; 
   border-radius: 35px;
   background: var(--muted);
-  overflow: visible;
+  overflow: visible; 
 }
 
 :deep(.p-progressbar-value) {
   background: var(--light-dark);
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-start; 
   border-radius: 35px;
   transition: width 0.4s ease;
-  min-width: 30px;
-  position: relative;
+  min-width: 30px; 
+  position: relative; 
 }
 
 :deep(.p-progressbar-value .progress-label-wrapper) {
-  position: absolute;
+  position: absolute; 
   left: 50%;
   transform: translateX(-50%);
   color: #fff;
   font-size: 0.6rem;
   font-weight: 600;
   white-space: nowrap;
-  min-width: 40px;
+  min-width: 40px; 
 }
 
 /* push labels of very small percentages to start */
@@ -1000,11 +998,11 @@ watch(weekly, () => buildChart(), { deep: true });
   }
 
   .card.card-plain {
-    padding: 12px 10px;
+    padding: 12px 10px; 
   }
 
   .goal-header {
-    gap: 8px;
+    gap: 8px; 
   }
 
   .goal-icon {
@@ -1014,7 +1012,7 @@ watch(weekly, () => buildChart(), { deep: true });
   }
 
   .goal-label {
-    font-size: 0.95rem;
+    font-size: 0.95rem; 
   }
 
   .goal-sub {
@@ -1031,7 +1029,8 @@ watch(weekly, () => buildChart(), { deep: true });
 
   :deep(.p-progressbar-value .progress-label-wrapper) {
     font-size: 0.7rem;
-    min-width: 50px;
+    min-width: 50px; 
   }
 }
+
 </style>
