@@ -17,12 +17,14 @@
           class="achievement-card"
           :class="{ unlocked: unlockedTypes.includes(ach.type.toLowerCase()) }"
         >
-          <div class="icon-wrapper">
-            <img :src="ach.iconUrl" :alt="ach.name" class="achievement-icon" />
-          </div>
-          <div class="text-wrapper">
-            <p class="achievement-name">{{ ach.name }}</p>
-            <p class="achievement-desc">{{ ach.description }}</p>
+          <div class="card-content">
+            <div class="icon-wrapper">
+              <img :src="ach.iconUrl" :alt="ach.name" class="achievement-icon" />
+            </div>
+            <div class="text-wrapper">
+              <p class="achievement-name">{{ ach.name }}</p>
+              <p class="achievement-desc">{{ ach.description }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -50,31 +52,18 @@ const fetchMasterAchievements = async () => {
       type: a.type.trim().toLowerCase(),
     }));
   } catch (err) {
-    console.error(
-      "Error fetching master achievements:",
-      err.response?.data || err.message
-    );
+    console.error("Error fetching master achievements:", err.response?.data || err.message);
   }
 };
 
 const fetchUserAchievements = async () => {
   if (!auth.user?._id) return;
   try {
-    await api.post(
-      `/achievements/check/${auth.user._id}`,
-      {},
-      { headers: { Authorization: `Bearer ${auth.token}` } }
-    );
-
-    const { data } = await api.get(`/achievements/${auth.user._id}`, {
-      headers: { Authorization: `Bearer ${auth.token}` },
-    });
+    await api.post(`/achievements/check/${auth.user._id}`, {}, { headers: { Authorization: `Bearer ${auth.token}` } });
+    const { data } = await api.get(`/achievements/${auth.user._id}`, { headers: { Authorization: `Bearer ${auth.token}` } });
     unlockedTypes.value = data.map((a) => a.type.trim().toLowerCase());
   } catch (err) {
-    console.error(
-      "Error fetching user achievements:",
-      err.response?.data || err.message
-    );
+    console.error("Error fetching user achievements:", err.response?.data || err.message);
   }
 };
 
@@ -83,13 +72,9 @@ const init = async () => {
   await fetchUserAchievements();
 };
 
-watch(
-  () => auth.user,
-  (newUser) => {
-    if (newUser?._id) init();
-  },
-  { immediate: true, deep: true }
-);
+watch(() => auth.user, (newUser) => {
+  if (newUser?._id) init();
+}, { immediate: true, deep: true });
 
 onMounted(init);
 </script>
@@ -97,8 +82,8 @@ onMounted(init);
 <style>
 .achievement-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
   padding: 1rem 0;
 }
 
@@ -106,64 +91,61 @@ onMounted(init);
 .achievement-card {
   background: #ffffff;
   border: 1px solid #e0e0e0;
-  border-radius: 16px;
-  text-align: center;
+  border-radius: 12px;
   padding: 1rem;
-  opacity: 0.35;
-  transition: all 0.25s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  opacity: 0.35; 
 }
 
 .achievement-card.unlocked {
-  opacity: 1;
-  border: 1px solid #4caf50;
-  background: linear-gradient(145deg, #e8ffe8 0%, #f8fff8 100%);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.35);
+  opacity: 1; 
+  border-color: #333333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.achievement-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+.card-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .icon-wrapper {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 0.75rem;
 }
 
-/*badge-sized icons */
 .achievement-icon {
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
+/* Text on the right */
 .text-wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  flex-grow: 1;
+  justify-content: center;
 }
 
-/* Text Design */
 .achievement-name {
   font-weight: 700;
   font-size: 1rem;
-  margin-bottom: 0.3rem;
-  color: #333;
-  word-wrap: break-word;
+  margin-bottom: 0.25rem;
+  color: #111111;
 }
 
 .achievement-desc {
-  font-size: 0.85rem;
-  color: #555;
-  line-height: 1.3;
-  max-height: 2.9em;
+  font-size: 0.875rem;
+  color: #555555;
+  line-height: 1.2;
+  max-height: 2.5em;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;

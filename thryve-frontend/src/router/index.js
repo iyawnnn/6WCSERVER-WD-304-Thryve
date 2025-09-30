@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Home from "../views/Home.vue";
 import Login from "../views/Login.vue";
 import Register from "../views/Register.vue";
 import Dashboard from "../views/Dashboard.vue";
@@ -12,7 +13,7 @@ import WaterTracker from "../views/WaterTracker.vue";
 import SleepTracker from "../views/SleepTracker.vue";
 
 const routes = [
-  // ADD PATH FOR HOME PAGE LATER
+  { path: "/", component: Home },
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
