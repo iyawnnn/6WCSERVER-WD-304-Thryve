@@ -61,6 +61,20 @@
   --p-inputtext-focus-ring-color: 1px solid !important;
   --p-paginator-nav-button-selected-background: black !important;
   --p-form-field-focus-ring-color: transparent !important;
+  --p-cascadeselect-overlay-background: white !important;
+  --p-cascadeselect-option-focus-background: var(--muted) !important;
+  --p-datepicker-header-background: white !important;
+  --p-datepicker-panel-background: white !important;
+  --p-paginator-background: white !important;
+  --p-datatable-header-cell-background: white !important;
+  --p-datatable-row-background: white !important;
+  --p-paginator-nav-button-hover-background: var(--muted) !important;
+  --p-paginator-nav-button-selected-color: white !important;
+  --p-select-overlay-background: white !important;
+  --p-paginator-nav-button-selected-color: white !important;
+  --p-select-option-focus-background: var(--muted) !important;
+  --p-dialog-background: white !important;
+  --p-dialog-color: black !important;
 }
 
 /* Reset & base styles */
@@ -375,6 +389,69 @@ input:-webkit-autofill:active {
   background-color: var(--background) !important;
   color: var(--foreground) !important;
 }
+
+/* Global dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  /* Inputs */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  .p-inputtext,
+  .p-cascadeselect,
+  .p-datepicker .p-inputtext {
+    background-color: white !important; 
+    color: black !important;            
+    border: 1px solid var(--border) !important;     
+  }
+
+  /* Placeholder */
+  input::placeholder,
+  .p-inputtext::placeholder {
+    color: #666 !important;
+  }
+
+  /* Focus state */
+  input:focus,
+  .p-inputtext:focus,
+  .p-cascadeselect:focus-within {
+    border-color: black !important;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* CascadeSelect panel + dropdowns */
+  .p-cascadeselect-panel,
+  .p-dropdown-panel {
+    background-color: white !important;   /* white background */
+    color: black !important;              /* black text */
+    border: 1px solid var(--border) !important;
+  }
+
+  /* Items inside the dropdown */
+  .p-cascadeselect-item,
+  .p-dropdown-item {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  /* Hovered option */
+  .p-cascadeselect-item:hover,
+  .p-dropdown-item:hover {
+    background-color: #f0f0f0 !important; 
+    color: black !important;
+  }
+
+  .p-paginator-page.p-paginator-page-selected{
+    color: white;
+  }
+
+  .p-cascadeselect-panel {
+    --p-select-overlay-background: white;
+  }
+
+}
+
+
+
 
 /* Responsive */
 @media (max-width: 1023px) {

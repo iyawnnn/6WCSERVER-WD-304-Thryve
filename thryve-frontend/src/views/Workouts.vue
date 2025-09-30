@@ -49,7 +49,6 @@
             <canvas ref="chartCanvas"></canvas>
           </div>
         </section>
-
       </div>
     </div>
   </DefaultLayout>
@@ -99,10 +98,22 @@ const buildChartData = (items) => {
   return { labels, data };
 };
 
+const destroyChart = () => {
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+  }
+};
+
 const createChart = () => {
   if (!chartCanvas.value) return;
+  
+  // Destroy existing chart before creating a new one
+  destroyChart();
+  
   const ctx = chartCanvas.value.getContext("2d");
   const { labels, data } = buildChartData(workouts.value);
+  
   chartInstance = new Chart(ctx, {
     type: "bar",
     data: {
@@ -115,7 +126,20 @@ const createChart = () => {
         },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false },
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    },
   });
 };
 
@@ -124,6 +148,7 @@ const updateChart = () => {
     createChart();
     return;
   }
+  
   const { labels, data } = buildChartData(workouts.value);
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = data;
@@ -148,19 +173,17 @@ watch(
       updateChart();
     } catch (err) {
       console.error("Chart update failed:", err);
+      // If update fails, recreate the chart completely
+      createChart();
     }
   },
   { deep: true }
 );
 
 onUnmounted(() => {
-  if (chartInstance) {
-    chartInstance.destroy();
-    chartInstance = null;
-  }
+  destroyChart();
 });
 </script>
-
 
 <style scoped>
 .grid-layout {
@@ -193,7 +216,6 @@ onUnmounted(() => {
   grid-column: span 2;
 }
 
-
 .summary-box {
   background: var(--muted);
   padding: 1rem;
@@ -222,7 +244,4 @@ onUnmounted(() => {
   width: 100% !important;
   height: 100% !important;
 }
-
-
-
 </style>
