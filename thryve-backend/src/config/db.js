@@ -1,9 +1,8 @@
-// config/db.js
 const mongoose = require('mongoose');
 
 async function connectDB(mongoUri) {
   try {
-    await mongoose.connect(mongoUri); // no options needed in Mongoose v6+
+    await mongoose.connect(mongoUri); 
     console.log('MongoDB connected');
   } catch (err) {
     console.error('MongoDB connection error:', err);

@@ -57,5 +57,4 @@ async function cleanupOldData() {
   }
 }
 
-cleanupOldData();
-// node scripts/cleanupOldData.js
+cleanupOldData(); // node scripts/cleanupOldData.js

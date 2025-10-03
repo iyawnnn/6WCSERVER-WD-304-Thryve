@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
-import { useToast } from "primevue/usetoast";  // ✅ import toast
+import { useToast } from "primevue/usetoast";  
 import { workouts, addWorkout, fetchWorkouts } from "../composables/useWorkouts.js";
 import { workoutOptions } from "../composables/useWorkoutOptions.js";
 import { calculateCalories } from "../utils/calcCalories";
@@ -8,7 +8,7 @@ import { useAuthStore } from "../stores/auth";
 import CascadeSelect from "primevue/cascadeselect";
 import DatePicker from "primevue/datepicker";
 
-const toast = useToast(); // ✅ toast instance
+const toast = useToast();
 
 const auth = useAuthStore();
 const userWeight = computed(() => auth.user?.weight);
@@ -88,7 +88,7 @@ const addWorkoutHandler = async () => {
 
 
 <template>
-  <form @submit.prevent="addWorkoutHandler" class="form-grid">
+  <form @submit.prevent="addWorkoutHandler" class="form-grid desktop-form">
     <!-- Row 1: Workout Type + Duration + Date -->
     <div class="form-row three-cols">
       <div class="input-group">
@@ -158,7 +158,6 @@ const addWorkoutHandler = async () => {
     </div>
   </form>
 </template>
-
 
 <style scoped>
 .calories-hint {
@@ -361,6 +360,47 @@ input:focus {
 /* Remove shadow just for DatePicker input */
 :deep(.p-datepicker .p-inputtext) {
   box-shadow: none !important;
+}
+
+.form-grid {
+  transform: none !important;
+}
+
+.form-row.three-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.form-row.three-cols .input-group {
+  min-width: 0; /* allow shrinking inside grid */
+}
+
+/* 📱 Prevent form overflow inside card */
+form.form-grid {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Make sure submit button stays inside card */
+form .btn-submit {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
 }
 
 </style>

@@ -1,22 +1,18 @@
 <script setup>
 import { ref } from "vue";
-import { useToast } from "primevue/usetoast"; // ✅ Toast for feedback
 import api from "../utils/api";
 import { meals } from "../composables/useMeals.js";
-import DatePicker from "primevue/datepicker";
+import { useToast } from "primevue/usetoast"; // ✅ PrimeVue toast composable
 
 const toast = useToast();
-
 const emit = defineEmits(["mealAdded"]);
 
 const foodName = ref("");
 const calories = ref(null);
 const protein = ref(null);
-const date = ref(new Date());
-const today = new Date();
+const date = ref(new Date().toISOString().split("T")[0]); // ✅ today's date (yyyy-mm-dd)
+const today = new Date().toISOString().split("T")[0];
 const isLoading = ref(false);
-
-const stripTime = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 const addMeal = async () => {
   if (!foodName.value.trim()) {
@@ -31,21 +27,18 @@ const addMeal = async () => {
     toast.add({ severity: "warn", summary: "Validation", detail: "Protein must be 0 or higher.", life: 3000 });
     return;
   }
-  if (stripTime(date.value) > stripTime(today)) {
+  if (date.value > today) {
     toast.add({ severity: "warn", summary: "Validation", detail: "Date cannot be in the future.", life: 3000 });
     return;
   }
 
   isLoading.value = true;
-
   try {
     const res = await api.post("/meals", {
       foodName: foodName.value.trim(),
       calories: Number(calories.value),
       protein: protein.value ? Number(protein.value) : 0,
-      date: `${date.value.getFullYear()}-${(date.value.getMonth() + 1)
-        .toString()
-        .padStart(2, "0")}-${date.value.getDate().toString().padStart(2, "0")}`,
+      date: date.value,
     });
 
     meals.value.unshift(res.data);
@@ -57,7 +50,7 @@ const addMeal = async () => {
     foodName.value = "";
     calories.value = null;
     protein.value = null;
-    date.value = new Date();
+    date.value = new Date().toISOString().split("T")[0];
   } catch (err) {
     console.error(err);
     toast.add({ severity: "error", summary: "Error", detail: "Failed to add meal. Try again.", life: 3000 });
@@ -69,7 +62,9 @@ const addMeal = async () => {
 
 <template>
   <form @submit.prevent="addMeal" class="form-grid">
-    <!-- Row 1: Food Name + Calories + Protein -->
+    <h1>Add Meal</h1>
+
+    <!-- Row 1: Meal Info -->
     <div class="form-row three-cols">
       <div class="input-group">
         <label class="input-label">Meal Name</label>
@@ -106,15 +101,15 @@ const addMeal = async () => {
     <div class="form-row">
       <div class="input-group full">
         <label class="input-label">Meal Date</label>
-        <DatePicker 
-          v-model="date"
-          showIcon
-          :maxDate="today"
-          dateFormat="yy-mm-dd"
-          placeholder="Select Date"
-          class="w-full"
-          :disabled="isLoading"
-        />
+        <div class="input-wrapper">
+          <input 
+            v-model="date"
+            type="date"
+            :max="today"
+            :disabled="isLoading"
+          />
+          <i class="pi pi-calendar calendar-icon"></i>
+        </div>
       </div>
     </div>
 
@@ -132,11 +127,15 @@ const addMeal = async () => {
 </template>
 
 <style scoped>
-/* === Reuse WorkoutForm styles === */
-
 form {
   font-family: "Geist", sans-serif;
   color: var(--foreground);
+  margin-bottom: 20px;
+}
+
+.form-grid h1 {
+  margin-bottom: 20px;
+  font-size: 25px;
 }
 
 .input-label {
@@ -149,8 +148,7 @@ form {
 
 input[type="text"],
 input[type="number"],
-:deep(.p-datepicker .p-inputtext),
-:deep(.p-datepicker .p-datepicker-trigger) {
+input[type="date"] {
   width: 100%;
   height: 42px;
   border: 1px solid var(--border);
@@ -158,28 +156,35 @@ input[type="number"],
   font-size: 1rem;
   font-family: "Geist", sans-serif;
   padding: 0 0.75rem;
-  box-sizing: border-box;
   background-color: var(--background);
   transition: border 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
 }
 
-/* Focus states */
-input:focus,
-:deep(.p-inputtext:enabled:focus),
-:deep(.p-datepicker .p-inputtext:enabled:focus) {
-  outline: none !important;
-  border-color: var(--primary) !important;
-  box-shadow: none !important;
+input:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
-/* DatePicker button */
-:deep(.p-datepicker .p-datepicker-trigger) {
-  border: 1px solid var(--border) !important;
-  border-left: none !important;
-  border-radius: 0 var(--radius) var(--radius) 0 !important;
-  height: 42px !important;
-  background: var(--background) !important;
+/* Date picker wrapper */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input[type="date"] {
+  width: 100%;
+  height: 42px;
+  padding-right: 2.5rem; /* space for calendar icon */
   cursor: pointer;
+}
+
+.calendar-icon {
+  position: absolute;
+  right: 2rem;
+  color: var(--muted-foreground);
+  pointer-events: none; /* ✅ lets input remain clickable */
 }
 
 /* Submit button */
@@ -188,7 +193,7 @@ input:focus,
 }
 
 .btn-submit {
-  /* background-color: var(--primary); */
+  background-color: var(--primary);
   color: var(--primary-foreground);
   border: none;
   padding: 0.5rem;
@@ -198,6 +203,7 @@ input:focus,
   cursor: pointer;
   transition: background 0.25s ease;
   text-align: center;
+  margin-top: 15px;
 }
 
 .btn-submit:hover {
@@ -228,44 +234,12 @@ input:focus,
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  margin-bottom: 10px;
 }
 
 .input-group {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.w-full {
-  width: 100%;
-}
-
-/* Override PrimeVue DatePicker CSS */
-:deep(.p-datepicker) {
-  --p-datepicker-dropdown-border-radius: var(--radius) !important;
-  border-radius: var(--radius) !important;
-}
-
-:deep(.p-datepicker .p-inputtext) {
-  border: 1px solid var(--border) !important;
-  border-right: none !important;
-  border-radius: var(--radius) 0 0 var(--radius) !important;
-  height: 42px !important;
-}
-
-:deep(.p-datepicker-dropdown) {
-  border-radius: 0 var(--radius) var(--radius) 0 !important;
-  border: 1px solid var(--border) !important;
-  background: var(--background) !important;
-  color: var(--foreground) !important;
-}
-
-:deep(.p-datepicker:focus-within .p-inputtext),
-:deep(.p-datepicker:focus-within .p-datepicker-dropdown) {
-  border-color: var(--primary) !important;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  display: none;
 }
 </style>

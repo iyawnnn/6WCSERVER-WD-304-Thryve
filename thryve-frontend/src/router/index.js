@@ -11,6 +11,7 @@ import Profile from "../views/Profile.vue";
 import Achievements from "../views/Achievements.vue";
 import WaterTracker from "../views/WaterTracker.vue";
 import SleepTracker from "../views/SleepTracker.vue";
+import NotFound from "../views/NotFound.vue"; 
 
 const routes = [
   { path: "/", component: Home },
@@ -24,7 +25,8 @@ const routes = [
   { path: "/profile", component: Profile, meta: { requiresAuth: true } },
   { path: "/achievements", component: Achievements, meta: { requiresAuth: true } },
   { path: "/water", component: WaterTracker, meta: { requiresAuth: true }},
-  { path: "/sleep", component: SleepTracker, meta: { requiresAuth: true } }
+  { path: "/sleep", component: SleepTracker, meta: { requiresAuth: true } },
+  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

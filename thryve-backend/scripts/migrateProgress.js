@@ -1,4 +1,3 @@
-// scripts/migrateProgress.js
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -53,7 +52,6 @@ async function migrateProgress() {
       progressMap[userId][dateStr].workoutMinutes += workout.duration;
     });
 
-    // Insert into Progress collection
     const progressDocs = [];
     for (const userId in progressMap) {
       for (const dateStr in progressMap[userId]) {

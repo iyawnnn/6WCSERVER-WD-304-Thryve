@@ -29,7 +29,6 @@ const achievementsData = [
     description: "Burn 1000 calories total",
     iconUrl: "/icons/1000-calories.png",
   },
-  // ==== NEW ACHIEVEMENTS ====
   {
     type: "Hydration5",
     name: "Hydration Novice",

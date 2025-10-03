@@ -1,8 +1,6 @@
 <template>
   <DefaultLayout v-slot="{ toggleSidebar }">
-    <!-- Page Header -->
     <div class="page-header">
-      <!-- Sidebar toggle button -->
       <button @click="toggleSidebar" class="sidebar-toggle">
         <i class="bi bi-layout-sidebar"></i>
       </button>
@@ -11,18 +9,14 @@
     </div>
 
     <div class="dashboard-body">
-      <!-- Top 3 Dashboard Cards (Calories, Sleep, Water) -->
       <div class="dashboard-cards">
         <!-- Calories Card -->
         <div class="dashboard-card">
-          <!-- Left side: Labels and breakdown -->
           <div class="card-left">
             <div class="card-title-row">
               <h4 class="card-title">Calories</h4>
               <span class="card-sub">Calories Burned</span>
             </div>
-
-            <!-- Breakdown of calories (Food vs Exercise) -->
             <ul class="card-breakdown">
               <li>
                 <i class="bi bi-fork-knife"></i>
@@ -40,8 +34,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Right side: Radial progress chart -->
           <div class="card-right">
             <apexchart
               type="radialBar"
@@ -50,7 +42,6 @@
               :series="[caloriePercent]"
               class="progress-ring"
             />
-            <!-- Overlay text inside radial bar -->
             <div class="ring-text">
               <div class="ring-number">{{ todayData.net ?? 0 }}</div>
               <div class="ring-label">Remaining</div>
@@ -65,8 +56,6 @@
               <h4 class="card-title">Sleep</h4>
               <span class="card-sub">Duration vs Goal</span>
             </div>
-
-            <!-- Breakdown of sleep (slept hours vs goal) -->
             <ul class="card-breakdown">
               <li>
                 <i class="bi bi-moon-stars icon"></i>
@@ -86,8 +75,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Right side: Radial bar for sleep -->
           <div class="card-right">
             <apexchart
               type="radialBar"
@@ -112,8 +99,6 @@
               <h4 class="card-title">Water</h4>
               <span class="card-sub">Daily intake</span>
             </div>
-
-            <!-- Breakdown of water intake vs goal -->
             <ul class="card-breakdown">
               <li>
                 <i class="bi bi-cup-fill icon"></i>
@@ -131,8 +116,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Right side: Radial bar for water intake -->
           <div class="card-right">
             <apexchart
               type="radialBar"
@@ -163,9 +146,7 @@
       <div class="card card-plain mt-6">
         <h6>Daily Goals</h6>
         <div class="goals-list">
-          <!-- Loop through each daily goal -->
           <div v-for="goal in dailyGoals" :key="goal.label" class="goal-row">
-            <!-- Goal header (icon + label + progress text) -->
             <div class="goal-header">
               <i :class="goal.icon" class="goal-icon"></i>
               <div class="goal-texts">
@@ -175,12 +156,12 @@
                 </div>
               </div>
             </div>
-
-            <!-- Progress bar (PrimeVue component) -->
             <div class="goal-progress">
-              <ProgressBar :value="goal.progress" showValue>
+              <ProgressBar :value="Math.min(goal.progress, 100)" showValue>
                 <template #value>
-                  <div class="progress-label-wrapper">{{ goal.progress }}%</div>
+                  <div class="progress-label-wrapper">
+                    {{ Math.min(goal.progress, 100) }}%
+                  </div>
                 </template>
               </ProgressBar>
             </div>
@@ -192,31 +173,24 @@
 </template>
 
 <script setup>
-// Vue + external libraries
 import { ref, computed, onMounted, watch } from "vue";
-import { Chart, registerables } from "chart.js"; // Chart.js for weekly trends
+import { Chart, registerables } from "chart.js";
 import DefaultLayout from "../components/Layout/DefaultLayout.vue";
-import ProgressBar from "primevue/progressbar"; // PrimeVue progress bar
-import VueApexCharts from "vue3-apexcharts"; // Radial charts
-import dashboardService from "../services/dashboardService"; // API service
-import { getWeekRange } from "../utils/dateHelpers"; // Helper function
-import { meals, fetchMeals } from "../composables/useMeals.js"; // Meal composable
-import sleepService from "@/services/sleepService"; // Sleep API service
-import waterService from "@/services/waterService"; // Water API service
+import ProgressBar from "primevue/progressbar";
+import VueApexCharts from "vue3-apexcharts";
+import dashboardService from "../services/dashboardService";
+import { getWeekRange } from "../utils/dateHelpers";
+import { meals, fetchMeals } from "../composables/useMeals.js";
+import sleepService from "@/services/sleepService";
+import waterService from "@/services/waterService";
 import { workouts, fetchWorkouts } from "../composables/useWorkouts.js";
 
-
-// Register Chart.js modules
 Chart.register(...registerables);
 
-// Get current week range (start/end labels)
 const { startLabel: weekStartLabel, endLabel: weekEndLabel } = getWeekRange();
-
-// Chart.js reference + instance
 const chartRef = ref(null);
 let chartInstance = null;
 
-// Today's stats
 const today = ref({
   caloriesBurned: 0,
   caloriesEaten: 0,
@@ -225,18 +199,16 @@ const today = ref({
   water: 0,
   goals: { calories: 0, protein: 0, workoutMinutes: 0 },
 });
-
-// Computed reference for today's data
 const todayData = computed(() => today.value);
-
-// Weekly stats array
 const weekly = ref([]);
 
-// ---- Computed percentages for radial charts ----
+// ---- Percentages ----
 const caloriePercent = computed(() => {
-  const eaten = today.value.caloriesEaten || 0;
-  const goal = today.value.goals?.calories || 2000;
-  return eaten ? Math.min(Math.round((eaten / goal) * 100), 100) : 0;
+  const net = today.value.net ?? 0;
+  const maxGoal = today.value.goals?.calories ?? 2000;
+  if (net === 0) return 100;
+  const progress = 100 - Math.min((Math.abs(net) / maxGoal) * 100, 100);
+  return Math.round(progress);
 });
 
 const sleepPercent = computed(() => {
@@ -250,40 +222,37 @@ const waterPercent = computed(() => {
   return drank ? Math.min(Math.round((drank / 2000) * 100), 100) : 0;
 });
 
-// ---- Chart colors (pulled from CSS variables) ----
+// ---- Chart colors ----
 const primary = getComputedStyle(document.documentElement)
   .getPropertyValue("--light-dark")
   .trim();
 const secondary = getComputedStyle(document.documentElement)
   .getPropertyValue("--ring-2")
   .trim();
-
-// Force dark color for radial bars
 let lightDark = getComputedStyle(document.documentElement)
   .getPropertyValue("--light-dark")
   .trim();
 lightDark = "hsl(0, 0%, 25%)";
 
-// ---- Radial bar chart base options ----
+// ---- Radial options ----
 const radialBase = (color) => ({
   chart: { sparkline: { enabled: true } },
   plotOptions: {
     radialBar: {
-      hollow: { size: "70%" }, // Inner hollow circle size
-      track: { background: "#e9ecef", strokeWidth: "100%" }, // Track background
-      dataLabels: { show: false }, // Hide default labels
+      hollow: { size: "70%" },
+      track: { background: "#e9ecef", strokeWidth: "100%" },
+      dataLabels: { show: false },
     },
   },
   colors: [color],
   stroke: { lineCap: "round" },
 });
 
-// Individual chart configs
 const calorieOptions = radialBase(lightDark);
 const sleepOptions = radialBase(lightDark);
 const waterOptions = radialBase(lightDark);
 
-// ---- Daily goals list (Calories, Workout, Protein) ----
+// ---- Daily Goals ----
 const dailyGoals = computed(() => [
   {
     label: "Calories",
@@ -324,23 +293,20 @@ const dailyGoals = computed(() => [
   },
 ]);
 
-// ---- Weekly chart builder (Chart.js line chart) ----
+// ---- Weekly Chart ----
 function buildChart() {
   if (!chartRef.value) return;
   const labels = weekly.value.map((d) => (d.day || "").slice(5));
   const burned = weekly.value.map((d) => d.burned || 0);
   const eaten = weekly.value.map((d) => d.eaten || 0);
-
   if (chartInstance) chartInstance.destroy();
 
-  // Determine font size based on screen width
   const width = window.innerWidth;
-  let fontSize = 14; // default
+  let fontSize = 14;
   if (width <= 480) fontSize = 10;
   else if (width <= 768) fontSize = 10;
   else if (width <= 1024) fontSize = 11;
   else if (width <= 1300) fontSize = 12;
-  else fontSize = 14; // >= 1301px
 
   chartInstance = new Chart(chartRef.value.getContext("2d"), {
     type: "line",
@@ -404,11 +370,8 @@ function buildChart() {
   });
 }
 
-window.addEventListener("resize", () => {
-  buildChart(); // rebuild chart on resize
-});
+window.addEventListener("resize", () => buildChart());
 
-// ---- Utility: Average calculator ----
 function avg(key) {
   if (!weekly.value.length) return 0;
   return Math.round(
@@ -416,72 +379,71 @@ function avg(key) {
   );
 }
 
-// ---- Fetch today's stats ----
+// ---- Fetch Today ----
 async function loadToday() {
   try {
-    // Fetch meals + workouts
     await fetchMeals();
     await fetchWorkouts();
-
     const res = await dashboardService.getToday();
     const data = res.data || {};
 
-    console.log("getToday response:", data);
-
-    // ---- Meals totals ----
     const mealTotals = {
       caloriesEaten: meals.value.reduce((sum, m) => sum + (m.calories || 0), 0),
       proteinEaten: meals.value.reduce((sum, m) => sum + (m.protein || 0), 0),
     };
-
-    // ---- Workout totals ----
     const workoutTotals = {
-      caloriesBurned: workouts.value.reduce((sum, w) => sum + (w.calories || 0), 0),
-      workoutMinutes: workouts.value.reduce((sum, w) => sum + (w.duration || 0), 0),
+      caloriesBurned: workouts.value.reduce(
+        (sum, w) => sum + (w.calories || 0),
+        0
+      ),
+      workoutMinutes: workouts.value.reduce(
+        (sum, w) => sum + (w.duration || 0),
+        0
+      ),
     };
 
-    // Merge priorities: API > meals/workouts fallback
     data.caloriesEaten = data.caloriesEaten ?? mealTotals.caloriesEaten ?? 0;
     data.proteinEaten = data.proteinEaten ?? mealTotals.proteinEaten ?? 0;
-    data.caloriesBurned = data.caloriesBurned ?? workoutTotals.caloriesBurned ?? 0;
-    data.workoutMinutes = data.workoutMinutes ?? workoutTotals.workoutMinutes ?? 0;
+    data.caloriesBurned =
+      data.caloriesBurned ?? workoutTotals.caloriesBurned ?? 0;
+    data.workoutMinutes =
+      data.workoutMinutes ?? workoutTotals.workoutMinutes ?? 0;
 
-    // Calculate net
     data.net =
       (data.goals?.calories ?? 2000) -
       (data.caloriesEaten ?? 0) +
       (data.caloriesBurned ?? 0);
 
-    // Sleep + water
     try {
       const sleepRes = await sleepService.getToday();
       data.sleepDuration = sleepRes.data?.duration ?? 0;
     } catch {
       data.sleepDuration = 0;
     }
-
     try {
       const waterRes = await waterService.getToday();
-      data.water = waterRes.data?.amount ?? 0;
+      const waterLogs = waterRes.data?.entries || [];
+      const totalWater = waterLogs.reduce(
+        (sum, entry) => sum + (entry.amount || 0),
+        0
+      );
+      data.water = totalWater;
     } catch {
       data.water = 0;
     }
 
-    // Defaults
     data.goals = data.goals ?? {
       calories: 2000,
       protein: 150,
       workoutMinutes: 60,
     };
-
     today.value = { ...today.value, ...data };
   } catch (err) {
     console.error("loadToday error:", err);
   }
 }
 
-
-// ---- Fetch weekly stats ----
+// ---- Fetch Weekly ----
 async function loadWeekly() {
   try {
     const res = await dashboardService.getWeekly();
@@ -492,13 +454,10 @@ async function loadWeekly() {
   }
 }
 
-// ---- Lifecycle hooks ----
 onMounted(async () => {
   await loadToday();
   await loadWeekly();
 });
-
-// Watch weekly data and rebuild chart on change
 watch(weekly, () => buildChart(), { deep: true });
 </script>
 
@@ -715,36 +674,36 @@ watch(weekly, () => buildChart(), { deep: true });
   font-size: 0.75rem;
   font-weight: 600;
   color: #fff;
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
 :deep(.p-progressbar) {
-  height: 12px; 
+  height: 12px;
   border-radius: 35px;
   background: var(--muted);
-  overflow: visible; 
+  overflow: visible;
 }
 
 :deep(.p-progressbar-value) {
   background: var(--light-dark);
   display: flex;
   align-items: center;
-  justify-content: flex-start; 
+  justify-content: flex-start;
   border-radius: 35px;
   transition: width 0.4s ease;
-  min-width: 30px; 
-  position: relative; 
+  min-width: 30px;
+  position: relative;
 }
 
 :deep(.p-progressbar-value .progress-label-wrapper) {
-  position: absolute; 
+  position: absolute;
   left: 50%;
   transform: translateX(-50%);
   color: #fff;
   font-size: 0.6rem;
   font-weight: 600;
   white-space: nowrap;
-  min-width: 40px; 
+  min-width: 40px;
 }
 
 /* push labels of very small percentages to start */
@@ -1009,11 +968,11 @@ watch(weekly, () => buildChart(), { deep: true });
   }
 
   .card.card-plain {
-    padding: 12px 10px; 
+    padding: 12px 10px;
   }
 
   .goal-header {
-    gap: 8px; 
+    gap: 8px;
   }
 
   .goal-icon {
@@ -1023,7 +982,7 @@ watch(weekly, () => buildChart(), { deep: true });
   }
 
   .goal-label {
-    font-size: 0.95rem; 
+    font-size: 0.95rem;
   }
 
   .goal-sub {
@@ -1040,8 +999,7 @@ watch(weekly, () => buildChart(), { deep: true });
 
   :deep(.p-progressbar-value .progress-label-wrapper) {
     font-size: 0.7rem;
-    min-width: 50px; 
+    min-width: 50px;
   }
 }
-
 </style>

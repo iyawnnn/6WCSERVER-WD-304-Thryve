@@ -1,4 +1,3 @@
-// src/controllers/dashboardController.js
 const mongoose = require("mongoose");
 const Meal = require("../models/Meal");
 const Workout = require("../models/Workout");
@@ -113,8 +112,6 @@ exports.getToday = async (req, res, next) => {
     next(err);
   }
 };
-
-
 
 // -------------------- WEEKLY --------------------
 exports.getWeekly = async (req, res, next) => {

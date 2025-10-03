@@ -1,4 +1,3 @@
-// src/services/dashboardService.js
 import Api from "../utils/api";
 
 export default {

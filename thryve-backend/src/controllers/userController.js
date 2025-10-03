@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const Preferences = require("../models/Preferences"); // existing
+const Preferences = require("../models/Preferences");
 const path = require("path");
 
 /**
@@ -61,10 +61,6 @@ exports.updateProfile = async (req, res) => {
     res.status(400).json({ error: "Failed to update profile" });
   }
 };
-
-/* -------------------------
-   Existing preferences handlers (kept, unchanged semantics)
-   ------------------------- */
 
 // GET user preferences
 exports.getPreferences = async (req, res, next) => {

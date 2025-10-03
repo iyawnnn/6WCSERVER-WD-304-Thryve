@@ -37,7 +37,8 @@ exports.register = async (req, res) => {
     const { name, email, password, age, weight, height } = req.body;
 
     const existing = await User.findOne({ email });
-    if (existing) return res.status(400).json({ error: "Email already exists" });
+    if (existing)
+      return res.status(400).json({ error: "Email already exists" });
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
@@ -71,7 +72,6 @@ exports.register = async (req, res) => {
     res.status(500).json({ error: "Registration failed" });
   }
 };
-
 
 exports.login = async (req, res, next) => {
   try {
@@ -121,7 +121,24 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
-    const html = `<p>Click <a href="${resetLink}">here</a> to reset your password. Expires in 1 hour.</p>`;
+    const html = `
+  <div style="font-family: Geist, sans-serif; line-height: 1.6; color: #333;">
+    <h2 style="color: #2c3e50;">Password Reset Request</h2>
+    <p>Hello ${user.name || ""},</p>
+    <p>We received a request to reset the password for your account. Click the button below to reset it. This link will expire in <strong>1 hour</strong>.</p>
+    
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="${resetLink}" 
+         style="background-color: #000; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+        Reset Password
+      </a>
+    </div>
+
+    <p>If you did not request a password reset, you can safely ignore this email.</p>
+
+    <p style="font-size: 0.9em; color: #777;">Thank you,<br />Thryve Team</p>
+  </div>
+`;
 
     console.log("Sending email to:", user.email); // <-- check here
     await sendEmail(user.email, "Password Reset", html);
