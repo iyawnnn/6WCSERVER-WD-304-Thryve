@@ -1,4 +1,3 @@
-// models/SleepLog.js
 const mongoose = require("mongoose");
 
 const sleepLogSchema = new mongoose.Schema(

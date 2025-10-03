@@ -1,7 +1,6 @@
-// run with: node src/scripts/seed/seedPhase2.js
 require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('../../models/User'); // adjust path if needed
+const User = require('../../models/User'); 
 const Workout = require('../../models/Workout');
 const Meal = require('../../models/Meal');
 const bcrypt = require('bcryptjs');
@@ -10,7 +9,7 @@ async function main() {
   await mongoose.connect(process.env.MONGO_URI);
   let user = await User.findOne({ email: 'demo@thryve.test' });
   if (!user) {
-    const passwordHash = await bcrypt.hash('password123', 10); // if your User model expects hashed password
+    const passwordHash = await bcrypt.hash('password123', 10); 
     user = await User.create({ name: 'Demo User', email: 'demo@thryve.test', password: passwordHash });
     console.log('Created demo user', user._id.toString());
   }

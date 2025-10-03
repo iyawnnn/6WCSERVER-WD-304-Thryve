@@ -87,7 +87,6 @@ onMounted(init);
   padding: 1rem 0;
 }
 
-/* Card */
 .achievement-card {
   background: #ffffff;
   border: 1px solid #e0e0e0;
@@ -127,7 +126,6 @@ onMounted(init);
   object-fit: contain;
 }
 
-/* Text on the right */
 .text-wrapper {
   display: flex;
   flex-direction: column;
@@ -152,4 +150,30 @@ onMounted(init);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
+
+@media (max-width: 400px) {
+  .achievement-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .achievement-card {
+    padding: 0.75rem;
+  }
+
+  .icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .achievement-name {
+    font-size: 0.875rem;
+  }
+
+  .achievement-desc {
+    font-size: 0.75rem;
+  }
+}
+
 </style>

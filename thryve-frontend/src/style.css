@@ -374,7 +374,6 @@ input:-webkit-autofill:active {
 
 }
 
-/* Workouts Paginator Border */
 .p-paginator .p-select {
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
@@ -382,7 +381,6 @@ input:-webkit-autofill:active {
   color: var(--foreground) !important;
 }
 
-/* If your <style> is scoped */
 :deep(.p-paginator .p-select) {
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
@@ -390,9 +388,7 @@ input:-webkit-autofill:active {
   color: var(--foreground) !important;
 }
 
-/* Global dark mode overrides */
 @media (prefers-color-scheme: dark) {
-  /* Inputs */
   input[type="text"],
   input[type="number"],
   input[type="date"],
@@ -404,13 +400,11 @@ input:-webkit-autofill:active {
     border: 1px solid var(--border) !important;     
   }
 
-  /* Placeholder */
   input::placeholder,
   .p-inputtext::placeholder {
     color: #666 !important;
   }
 
-  /* Focus state */
   input:focus,
   .p-inputtext:focus,
   .p-cascadeselect:focus-within {
@@ -418,22 +412,19 @@ input:-webkit-autofill:active {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   }
 
-  /* CascadeSelect panel + dropdowns */
   .p-cascadeselect-panel,
   .p-dropdown-panel {
-    background-color: white !important;   /* white background */
-    color: black !important;              /* black text */
+    background-color: white !important;  
+    color: black !important;             
     border: 1px solid var(--border) !important;
   }
 
-  /* Items inside the dropdown */
   .p-cascadeselect-item,
   .p-dropdown-item {
     background-color: white !important;
     color: black !important;
   }
 
-  /* Hovered option */
   .p-cascadeselect-item:hover,
   .p-dropdown-item:hover {
     background-color: #f0f0f0 !important; 
@@ -447,13 +438,8 @@ input:-webkit-autofill:active {
   .p-cascadeselect-panel {
     --p-select-overlay-background: white;
   }
-
 }
 
-
-
-
-/* Responsive */
 @media (max-width: 1023px) {
   .login-page {
     grid-template-columns: 1fr;

@@ -83,7 +83,7 @@
           icon="pi pi-check" 
           @click="handleDelete(deleteTarget._id)" 
           :disabled="isDeleting"
-          class="p-button-danger" 
+          class="p-button-danger confirm-yes" 
           autofocus
         />
       </template>
@@ -354,6 +354,10 @@ h3{
 
 :deep(.p-datatable-tbody > tr.row-deleting td) {
   animation: fadeOutRow 0.3s forwards ease-out;
+}
+
+.confirm-yes{
+  color:white;
 }
 
 @keyframes fadeOutRow {

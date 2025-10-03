@@ -1,173 +1,157 @@
 <template>
   <DefaultLayout v-slot="{ toggleSidebar }">
-    <div class="profile container py-4">
+    <div class="profile">
       <!-- Page header -->
-      <div class="page-header d-flex align-items-center mb-4">
-        <button @click="toggleSidebar" class="sidebar-toggle btn btn-ghost me-3" aria-label="Toggle sidebar">
+      <div class="page-header">
+        <!-- Sidebar toggle button -->
+        <button @click="toggleSidebar" class="sidebar-toggle">
           <i class="bi bi-layout-sidebar"></i>
         </button>
-        <h1 class="page-title mb-0">Profile</h1>
-        <div class="ms-auto">
-          <button class="btn btn-outline-secondary me-2" @click="copyProfileLink" title="Copy profile link">Share</button>
-          <button class="btn btn-dark" @click="saveProfile">Save</button>
-        </div>
+        <div class="separator"></div>
+        <span class="page-title">Profile</span>
       </div>
 
-      <div class="row g-4">
+      <div class="profile-grid">
         <!-- Left: hero + stats -->
-        <div class="col-lg-4">
+        <div class="profile-left">
           <div class="card hero-card">
-            <div class="hero-top d-flex align-items-center gap-3">
+            <div class="hero-info">
+              <!-- Avatar -->
+              <!-- Avatar -->
               <div class="avatar-wrap">
-                <img :src="avatarPreview || '/default-avatar.png'" alt="Avatar" class="avatar" />
-                <label class="avatar-upload" title="Upload photo">
-                  <i class="bi bi-camera"></i>
-                  <input type="file" accept="image/*" @change="onAvatarChange" />
-                </label>
+                <img
+                  :src="avatarPreview || defaultAvatar"
+                  alt="Avatar"
+                  class="avatar"
+                />
               </div>
-              <div>
-                <h3 class="mb-0">{{ userName || 'Your Name' }}</h3>
-                <small class="text-muted">Member</small>
-              </div>
-            </div>
 
-            <div class="hero-stats mt-3">
-              <div class="stat-row d-flex justify-content-between">
-                <div>
-                  <div class="stat-label">BMI</div>
-                  <div class="stat-value">{{ bmi ?? '—' }}</div>
-                </div>
-                <div>
-                  <div class="stat-label">BMR</div>
-                  <div class="stat-value">{{ bmr ?? '—' }} kcal</div>
-                </div>
-                <div>
-                  <div class="stat-label">Daily Rec.</div>
-                  <div class="stat-value">{{ recommendedCalories ?? '—' }} kcal</div>
+              <!-- Name + Meta -->
+              <div class="hero-meta">
+                <h3 class="hero-name">{{ userName || "Your Name" }}</h3>
+
+                <!-- Stats -->
+                <div class="hero-stats">
+                  <div class="stat">
+                    <span class="stat-label">BMI</span>
+                    <span class="stat-value">{{ bmi ?? "—" }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">BMR</span>
+                    <span class="stat-value">
+                      {{ bmr ?? "—" }} <span class="unit">kcal</span>
+                    </span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Daily Rec.</span>
+                    <span class="stat-value">
+                      {{ recommendedCalories ?? "—" }}
+                      <span class="unit">kcal</span>
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div class="hero-actions mt-3 d-flex gap-2">
-              <button class="btn btn-sm btn-outline-primary" @click="suggestGoal">Use Suggestion</button>
-              <button class="btn btn-sm btn-outline-secondary" @click="resetToday">Reset Day</button>
-            </div>
-          </div>
-
-          <!-- quick goals progress -->
-          <div class="card mt-3 p-3 d-flex align-items-center gap-3">
-            <div class="me-3 progress-block">
-              <svg viewBox="0 0 36 36" class="circular-chart">
-                <path class="circle-bg"
-                  d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                <path class="circle"
-                  :stroke-dasharray="caloriesProgress + ', 100'"
-                  d="M18 2.0845
-                    a 15.9155 15.9155 0 0 1 0 31.831
-                    a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                <text x="18" y="20.35" class="percentage">{{ caloriesProgress }}%</text>
-              </svg>
-            </div>
-            <div class="flex-grow-1">
-              <div class="small text-muted">Calories today</div>
-              <div class="d-flex gap-2 align-items-center mt-2">
-                <input v-model.number="dailyCaloriesConsumed" type="number" class="form-control form-control-sm" min="0" />
-                <button class="btn btn-sm btn-primary" @click="addCaloriesLog">Log</button>
-              </div>
-              <div class="small mt-2 text-muted">Goal: {{ dailyCaloriesGoal || '—' }} kcal</div>
             </div>
           </div>
         </div>
 
-        <!-- Right: profile form & goals -->
-        <div class="col-lg-8">
+        <!-- Right: profile form & goals side by side -->
+        <div class="profile-sections">
+          <!-- Profile Information -->
           <div class="card p-3">
             <h4 class="mb-3">Profile Information</h4>
-            <form @submit.prevent="saveProfile">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label">Age</label>
-                  <input v-model.number="age" type="number" class="form-control" min="10" max="120" />
-                </div>
+            <form @submit.prevent="saveProfile" class="form-grid">
+              <!-- Age -->
+              <div class="form-group">
+                <label class="form-label">Age</label>
+                <input
+                  v-model.number="age"
+                  type="number"
+                  min="10"
+                  max="120"
+                  class="form-control"
+                />
+              </div>
 
-                <div class="col-md-4">
-                  <label class="form-label">Gender</label>
-                  <select v-model="gender" class="form-select">
-                    <option value="">Prefer not to say</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+              <!-- Weight -->
+              <div class="form-group span-2">
+                <label class="form-label">Weight</label>
+                <div class="inline-inputs">
+                  <input
+                    v-model.number="weightDisplay"
+                    type="number"
+                    class="form-control"
+                  />
+                  <select v-model="weightUnit" class="form-control unit-select">
+                    <option value="kg">kg</option>
+                    <option value="lb">lb</option>
                   </select>
                 </div>
+              </div>
 
-                <div class="col-md-4">
-                  <label class="form-label">Activity</label>
-                  <select v-model="activityLevel" class="form-select" title="Activity level helps estimate your daily calorie needs">
-                    <option value="sedentary">Sedentary (little/no exercise)</option>
-                    <option value="light">Light (1-3 days/week)</option>
-                    <option value="moderate">Moderate (3-5 days/week)</option>
-                    <option value="active">Active (6-7 days/week)</option>
-                    <option value="veryActive">Very active / physical job</option>
+              <!-- Height -->
+              <div class="form-group span-2">
+                <label class="form-label">Height</label>
+                <div class="inline-inputs">
+                  <input
+                    v-model="heightDisplay"
+                    @input="formatHeight"
+                    type="text"
+                    placeholder="e.g. 180 or 5'11"
+                    class="form-control"
+                  />
+                  <select v-model="heightUnit" class="form-control unit-select">
+                    <option value="cm">cm</option>
+                    <option value="ft">ft</option>
                   </select>
                 </div>
+              </div>
 
-                <!-- Weight -->
-                <div class="col-md-6">
-                  <label class="form-label">Weight</label>
-                  <div class="d-flex">
-                    <input v-model.number="weightDisplay" type="number" class="form-control" />
-                    <select v-model="weightUnit" class="form-select ms-2" style="max-width:110px">
-                      <option value="kg">kg</option>
-                      <option value="lb">lb</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Height -->
-                <div class="col-md-6">
-                  <label class="form-label">Height</label>
-                  <div class="d-flex">
-                    <input v-model="heightDisplay" @input="formatHeight" type="text" class="form-control" placeholder="e.g. 180 or 5'11" />
-                    <select v-model="heightUnit" class="form-select ms-2" style="max-width:110px" @change="syncHeightDisplay">
-                      <option value="cm">cm</option>
-                      <option value="ft">ft</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="col-12">
-                  <button type="submit" class="btn btn-dark">Save Profile</button>
-                </div>
+              <div class="form-group span-2">
+                <button type="submit" class="btn btn-primary">
+                  Save Profile
+                </button>
               </div>
             </form>
           </div>
 
-          <!-- Goals card -->
-          <div class="card p-3 mt-3">
+          <!-- Goals -->
+          <div class="card p-3">
             <h4 class="mb-3">Daily Goals</h4>
-            <form @submit.prevent="saveGoals" class="row g-3 align-items-end">
-              <div class="col-md-4">
+            <form @submit.prevent="saveGoals" class="form-grid">
+              <div class="form-group">
                 <label class="form-label">Calories Target</label>
-                <input v-model.number="dailyCaloriesGoal" type="number" class="form-control" />
+                <input
+                  v-model.number="dailyCaloriesGoal"
+                  type="number"
+                  class="form-control"
+                />
               </div>
-              <div class="col-md-4">
+              <div class="form-group">
                 <label class="form-label">Protein Target (g)</label>
-                <input v-model.number="dailyProteinGoal" type="number" class="form-control" />
+                <input
+                  v-model.number="dailyProteinGoal"
+                  type="number"
+                  class="form-control"
+                />
               </div>
-              <div class="col-md-4">
+              <div class="form-group">
                 <label class="form-label">Workout Minutes Target</label>
-                <input v-model.number="dailyWorkoutMinutesGoal" type="number" class="form-control" />
+                <input
+                  v-model.number="dailyWorkoutMinutesGoal"
+                  type="number"
+                  class="form-control"
+                />
               </div>
-              <div class="col-12">
-                <button type="submit" class="btn btn-primary">Save Goals</button>
-                <button type="button" class="btn btn-outline-secondary ms-2" @click="applyQuickPreset('lose')">Preset: Lose</button>
-                <button type="button" class="btn btn-outline-secondary ms-1" @click="applyQuickPreset('maintain')">Preset: Maintain</button>
+              <div class="form-group span-3">
+                <button type="submit" class="btn btn-primary">
+                  Save Goals
+                </button>
               </div>
             </form>
           </div>
-        </div> <!-- end right column -->
-      </div> <!-- end row -->
+        </div>
+      </div>
     </div>
   </DefaultLayout>
 </template>
@@ -190,9 +174,8 @@ const height = ref(""); // internal cm
 const heightDisplay = ref("");
 const heightUnit = ref("cm");
 
-/* avatar */
+const defaultAvatar = "https://i.pravatar.cc/40?img=12";
 const avatarFile = ref(null);
-const avatarPreview = ref("");
 
 /* goals & quick logs */
 const dailyCaloriesGoal = ref(null);
@@ -260,11 +243,11 @@ const heightCm = computed(() => {
     return cm || null;
   }
   const parsed = parseFloat(heightDisplay.value);
-  return !isNaN(parsed) && parsed > 0 ? parsed : (height.value || null);
+  return !isNaN(parsed) && parsed > 0 ? parsed : height.value || null;
 });
 const bmi = computed(() => {
   if (!weightKg.value || !heightCm.value) return null;
-  const val = weightKg.value / ((heightCm.value / 100) ** 2);
+  const val = weightKg.value / (heightCm.value / 100) ** 2;
   return Math.round(val * 10) / 10;
 });
 const bmr = computed(() => {
@@ -285,13 +268,17 @@ const activityMultipliers = {
 };
 const recommendedCalories = computed(() => {
   if (!bmr.value) return null;
-  return Math.round(bmr.value * (activityMultipliers[activityLevel.value] || 1.2));
+  return Math.round(
+    bmr.value * (activityMultipliers[activityLevel.value] || 1.2)
+  );
 });
 
 /* calories progress for circular chart */
 const caloriesProgress = computed(() => {
   if (!dailyCaloriesGoal.value || dailyCaloriesGoal.value <= 0) return 0;
-  const pct = Math.round((dailyCaloriesConsumed.value / dailyCaloriesGoal.value) * 100);
+  const pct = Math.round(
+    (dailyCaloriesConsumed.value / dailyCaloriesGoal.value) * 100
+  );
   return Math.min(100, Math.max(0, pct));
 });
 
@@ -308,7 +295,8 @@ onMounted(async () => {
       // API weight assumed kg
       const kg = Number(data.weight);
       if (!isNaN(kg)) {
-        if (weightUnit.value === "lb") weightDisplay.value = Math.round(convertKgToLb(kg));
+        if (weightUnit.value === "lb")
+          weightDisplay.value = Math.round(convertKgToLb(kg));
         else weightDisplay.value = Math.round(kg);
       }
     }
@@ -316,7 +304,6 @@ onMounted(async () => {
       height.value = data.height; // cm
       syncHeightDisplay();
     }
-    if (data.avatarUrl) avatarPreview.value = data.avatarUrl;
 
     // preferences/goals
     const prefRes = await api.get("/users/preferences");
@@ -328,17 +315,12 @@ onMounted(async () => {
     // optionally load today's consumed (if API provides it)
     dailyCaloriesConsumed.value = prefs.todayCalories ?? 0;
   } catch (err) {
-    console.error("Failed to load profile:", err?.response?.data || err?.message);
+    console.error(
+      "Failed to load profile:",
+      err?.response?.data || err?.message
+    );
   }
 });
-
-/* ---------- avatar ---------- */
-const onAvatarChange = (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  avatarFile.value = file;
-  avatarPreview.value = URL.createObjectURL(file);
-};
 
 /* ---------- save profile ---------- */
 const saveProfile = async () => {
@@ -356,7 +338,8 @@ const saveProfile = async () => {
     let weightKgToSend = null;
     const parsedW = parseFloat(weightDisplay.value);
     if (!isNaN(parsedW)) {
-      weightKgToSend = weightUnit.value === "lb" ? convertLbToKg(parsedW) : parsedW;
+      weightKgToSend =
+        weightUnit.value === "lb" ? convertLbToKg(parsedW) : parsedW;
     }
 
     await api.put("/users/profile", {
@@ -366,24 +349,13 @@ const saveProfile = async () => {
       height: heightCmToSend,
     });
 
-    // upload avatar if present (example endpoint)
-    if (avatarFile.value) {
-      try {
-        const fd = new FormData();
-        fd.append("avatar", avatarFile.value);
-        // endpoint might differ - adjust to your backend
-        await api.post("/users/avatar", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } catch (err) {
-        console.warn("Avatar upload failed (non-blocking):", err?.response?.data || err?.message);
-      }
-    }
-
     // optimistic UI message
     alert("Profile updated!");
   } catch (err) {
-    console.error("Failed to update profile:", err?.response?.data || err?.message);
+    console.error(
+      "Failed to update profile:",
+      err?.response?.data || err?.message
+    );
     alert("Failed to update profile. Try again.");
   }
 };
@@ -398,7 +370,10 @@ const saveGoals = async () => {
     });
     alert("Goals updated!");
   } catch (err) {
-    console.error("Failed to save preferences:", err?.response?.data || err?.message);
+    console.error(
+      "Failed to save preferences:",
+      err?.response?.data || err?.message
+    );
     alert("Failed to update goals. Try again.");
   }
 };
@@ -415,19 +390,26 @@ const addCaloriesLog = () => {
 
 const applyQuickPreset = (which) => {
   if (which === "lose") {
-    dailyCaloriesGoal.value = Math.max(1200, (recommendedCalories.value ? Math.round(recommendedCalories.value * 0.8) : 1800));
+    dailyCaloriesGoal.value = Math.max(
+      1200,
+      recommendedCalories.value
+        ? Math.round(recommendedCalories.value * 0.8)
+        : 1800
+    );
     dailyProteinGoal.value = 140;
     dailyWorkoutMinutesGoal.value = 40;
   } else {
     // maintain
-    dailyCaloriesGoal.value = recommendedCalories.value || dailyCaloriesGoal.value || 2200;
+    dailyCaloriesGoal.value =
+      recommendedCalories.value || dailyCaloriesGoal.value || 2200;
     dailyProteinGoal.value = 100;
     dailyWorkoutMinutesGoal.value = 30;
   }
 };
 
 const suggestGoal = () => {
-  if (recommendedCalories.value) dailyCaloriesGoal.value = recommendedCalories.value;
+  if (recommendedCalories.value)
+    dailyCaloriesGoal.value = recommendedCalories.value;
 };
 
 const resetToday = () => {
@@ -445,66 +427,362 @@ const copyProfileLink = async () => {
 </script>
 
 <style scoped>
-/* colors and general card styling */
-:root {
-  --card-bg: #fff;
-  --muted: #6c757d;
-  --accent: #111827; /* dark accent */
-  --glass: rgba(255,255,255,0.6);
+.page-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
-.profile .page-header { border-bottom: 1px solid rgba(0,0,0,0.06); padding-bottom: 1rem; }
+/* Page header */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
 
-.card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(27,31,35,0.06);
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Layout as stacked rows */
+.profile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hero-card {
+  display: flex;
+  justify-content: center; 
+  flex-direction: column;
   padding: 1rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(27, 31, 35, 0.06);
+  height: 150px;
 }
 
-/* Hero */
-.hero-card { display:flex; flex-direction:column; gap:0.75rem; }
-.hero-top { align-items:center; }
-.avatar-wrap { position:relative; width:72px; height:72px; }
+.hero {
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  min-height: 100%;
+}
+
+/* Layout for avatar + meta */
+.hero-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Avatar */
+.avatar-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
 .avatar {
-  width:72px; height:72px; border-radius:14px; object-fit:cover;
-  box-shadow: 0 6px 12px rgba(17,24,39,0.06);
-  border: 2px solid rgba(0,0,0,0.04);
-}
-.avatar-upload {
-  position:absolute; right:-6px; bottom:-6px;
-  background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center;
-  width:30px; height:30px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.05);
-}
-.avatar-upload input { display:none; }
-
-/* hero stats */
-.stat-row { gap: 1rem; display:flex; }
-.stat-label { font-size: 0.75rem; color: var(--muted); }
-.stat-value { font-weight:700; font-size: 1.1rem; }
-
-/* circular progress */
-.circular-chart { width:64px; height:64px; transform: rotate(-90deg); }
-.circle-bg { fill: none; stroke: #eee; stroke-width: 3.5; }
-.circle { fill: none; stroke-width: 3.5; stroke: #3b82f6; stroke-linecap: round; transition: stroke-dasharray .6s ease; }
-.percentage { font-size: 7px; text-anchor: middle; fill: #111; transform: rotate(90deg); }
-
-/* small responsive tweaks */
-@media (max-width: 768px) {
-  .hero-top { gap: 0.5rem; }
-  .avatar { width:56px; height:56px; }
-  .circular-chart { width:56px; height:56px; }
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 6px 12px rgba(17, 24, 39, 0.06);
+  border: 2px solid rgba(0, 0, 0, 0.04);
 }
 
-/* Inputs and buttons look */
-.btn-ghost { background: transparent; border: none; color: var(--accent); }
-.form-control:focus { box-shadow: 0 0 0 0.125rem rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.8); }
+/* Meta */
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1; 
+  max-width: 400px; 
+}
+.hero-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
 
-/* subtle hover */
-.card:hover { transform: translateY(-2px); transition: transform .15s ease; }
+/* Stats under name */
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
 
-/* small helpers */
-.small { font-size: .85rem; }
-.text-muted { color: var(--muted); }
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.stat-value {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Profile Card */
+.profile-right .card {
+  border: 1px solid hsl(0, 0%, 90%);
+  border-radius: 12px;
+  background: hsl(0, 0%, 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.profile-right .card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: hsl(0, 0%, 20%);
+  margin-bottom: 1rem;
+}
+
+.profile-sections {
+  display: flex;
+  gap: 1.5rem; 
+  margin-top: 1rem;
+}
+
+.profile-sections .card {
+  flex: 1; 
+  min-width: 0; 
+}
+
+h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Form Grid */
+.form-grid {
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.span-2 {
+  grid-column: span 2;
+}
+
+/* Labels */
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: hsl(0, 0%, 35%);
+  margin-bottom: 0.4rem;
+}
+
+/* Inputs & Selects */
+.form-control {
+  border: 1px solid hsl(0, 0%, 85%);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  color: hsl(0, 0%, 15%);
+  background: hsl(0, 0%, 100%);
+  transition: all 0.2s ease;
+  height: 38px;
+  box-sizing: border-box;
+  width: 100%;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: none;
+}
+
+/* Inline inputs (weight + unit, height + unit) */
+.inline-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Unit select override */
+.form-control.unit-select {
+  flex: 0 0 80px;
+  height: 38px;
+  font-size: 0.9rem;
+  padding: 0 1.75rem 0 0.5rem;
+  line-height: 1.4;
+  cursor: pointer;
+
+  /* Custom arrow */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='50' viewBox='0 0 24 24' width='50' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 0.8rem;
+}
+
+/* Remove number input spinners in Chrome, Edge, Safari */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove number input spinners in Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Button */
+.btn.btn-dark {
+  background: hsl(0, 0%, 15%);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn.btn-dark:hover {
+  background: hsl(0, 0%, 10%);
+  transform: translateY(-1px);
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .hero-info {
+    gap: 1rem;
+  }
+  .hero-stats {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .profile-sections {
+    flex-direction: column;
+  }
+  .form-grid {
+    grid-template-columns: 1fr; 
+  }
+  .inline-inputs {
+    flex-direction: column; 
+    gap: 0.3rem;
+  }
+  .form-control.unit-select {
+    flex: 1 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-card {
+    height: auto;
+    padding: 0.8rem;
+  }
+  .avatar-wrap {
+    width: 70px;
+    height: 70px;
+  }
+  .hero-name {
+    font-size: 1.2rem;
+  }
+  .stat-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .hero-info {
+    flex-direction: column; 
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .hero-meta {
+    align-items: center; 
+    text-align: center;
+    width: 100%; 
+    max-width: none; 
+    margin: 0 auto; 
+  }
+
+  .avatar-wrap {
+    width: 80px;
+    height: 80px;
+  }
+
+  .stat {
+    flex: 1;
+  }
+
+  .hero-name {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .stat-value .unit {
+    display: none;
+  }
+
+  h4 {
+    text-align: center;
+  }
+
+  .hero-card {
+    height: auto;
+    padding: 0.8rem;
+  }
+}
 </style>

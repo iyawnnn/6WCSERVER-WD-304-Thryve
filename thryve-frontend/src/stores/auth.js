@@ -15,10 +15,9 @@ export const useAuthStore = defineStore("auth", {
       this.user = res.user;
       localStorage.setItem("token", res.token);
 
-      // ✅ Apply token to all future requests
+      // Apply token to all future requests
       api.defaults.headers.common["Authorization"] = `Bearer ${res.token}`;
 
-      // Optional: fetch user immediately
       await this.fetchMe(); // will populate auth.user
       return res;
     },
@@ -29,7 +28,7 @@ export const useAuthStore = defineStore("auth", {
       this.user = res.user;
       localStorage.setItem("token", res.token);
 
-      // ✅ Set token for Axios
+      // Set token for Axios
       api.defaults.headers.common["Authorization"] = `Bearer ${res.token}`;
     },
 

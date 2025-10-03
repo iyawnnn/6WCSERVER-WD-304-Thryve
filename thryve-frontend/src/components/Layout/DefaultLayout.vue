@@ -112,7 +112,7 @@ export default {
 
 @media (max-width: 500px) {
   .main-content {
-    margin-left: 12rem; /* match the smaller sidebar */
+    margin-left: 12rem; 
     padding: 0.5rem;
   }
 

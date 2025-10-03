@@ -1,4 +1,3 @@
-
 function errorHandler(err, req, res, next) {
   console.error(err);
   if (err.name === 'MongoError' && err.code === 11000) {

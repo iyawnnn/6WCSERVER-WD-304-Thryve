@@ -2,7 +2,8 @@
   <aside class="sidebar">
     <!-- Branding -->
     <div class="sidebar-header">
-      <img src="../../assets/uploads/logo.svg" alt="Thrve Logo" class="logo" />
+      <img src="../../assets/uploads/symbol.svg" alt="Thryve Logo" class="logo" />
+      <span class="brand-text">THRYVE</span>
     </div>
 
     <!-- Main Navigation -->
@@ -42,7 +43,6 @@ function logout() {
   sessionStorage.removeItem("token");
   router.push("/login");
 }
-
 </script>
 
 <style scoped>
@@ -72,7 +72,7 @@ function logout() {
 }
 
 .content-body {
-  margin-left: 0; 
+  margin-left: 0;
   transition: margin-left 0.3s;
 }
 
@@ -83,19 +83,29 @@ function logout() {
 
 .sidebar-header {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center; 
   padding: 1rem 0;
+  gap: 0.6rem; 
+  margin-bottom: 1rem;
 }
 
+
 .sidebar-header .logo {
-  max-width: 120px;
+  max-width: 40px; 
   height: auto;
   transition: transform 0.75s ease;
 }
 
 .sidebar-header .logo:hover {
-  transform: scale(1.10);
+  transform: scale(1.1);
+}
+
+.brand-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  font-family: "Geist", sans-serif;
 }
 
 .nav-section {
@@ -144,19 +154,19 @@ function logout() {
 .nav-extra .nav-link,
 .nav-extra .nav-link span {
   font-weight: 500;
-  font-family: inherit; 
-  line-height: 1.2;     
+  font-family: inherit;
+  line-height: 1.2;
 }
 
 @media (min-width: 1201px) {
   .sidebar {
-    width: 18rem; 
+    width: 18rem;
   }
 }
 
 @media (max-width: 1200px) and (min-width: 1025px) {
   .sidebar {
-    width: 14rem; 
+    width: 14rem;
   }
 }
 
@@ -181,26 +191,26 @@ function logout() {
 /* Extra small devices: ≤500px */
 @media (max-width: 500px) {
   .sidebar {
-    width: 14.5rem; 
+    width: 14.5rem;
     padding: 1rem 1rem;
   }
 
   .sidebar-header .logo {
-    max-width: 100px; 
+    max-width: 40px;
   }
 
   .nav-link {
-    padding: 0.4rem 0.6rem; 
-    font-size: 0.8rem; 
-    gap: 0.5rem; 
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    gap: 0.5rem;
   }
 
   .nav-extra .nav-link {
-    font-size: 0.8rem; 
+    font-size: 0.8rem;
   }
 
   .nav-user .avatar {
-    width: 32px; 
+    width: 32px;
     height: 32px;
   }
 
@@ -212,5 +222,4 @@ function logout() {
     font-size: 0.65rem;
   }
 }
-
 </style>

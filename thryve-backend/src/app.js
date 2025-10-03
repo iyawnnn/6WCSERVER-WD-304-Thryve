@@ -1,4 +1,3 @@
-// Core imports
 const express = require('express');
 const helmet = require('helmet'); // Security middleware (sets secure HTTP headers)
 const cors = require('cors'); // Cross-Origin Resource Sharing (allow frontend to call backend)

@@ -13,13 +13,20 @@
     <div class="grid-layout">
       <!-- Left side: Form + History -->
       <div class="left-panel">
-        <section class="card">
-          <h3>Add a Workout</h3>
+        <section class="card form-container">
           <WorkoutForm />
         </section>
 
         <section class="card">
           <WorkoutHistory />
+        </section>
+
+        <section class="mobilecard form-page">
+          <MobileWorkoutForm />       
+        </section>
+        
+        <section class="mobilecard">
+          <mobileWorkoutHistory />       
         </section>
       </div>
 
@@ -58,7 +65,9 @@
 import { computed, onMounted, ref, watch, onUnmounted } from "vue";
 import Chart from "chart.js/auto";
 import WorkoutForm from "../components/WorkoutForm.vue";
+import MobileWorkoutForm from "../components/mobileWorkoutForm.vue";
 import WorkoutHistory from "../components/WorkoutHistory.vue";
+import mobileWorkoutHistory from "../components/mobileWorkoutHistory.vue";
 import DefaultLayout from "../components/Layout/DefaultLayout.vue";
 import { workouts, fetchWorkouts } from "../composables/useWorkouts.js";
 
@@ -244,4 +253,72 @@ onUnmounted(() => {
   width: 100% !important;
   height: 100% !important;
 }
+
+/* Ensure WorkoutForm fills the card without overflow */
+.form-container {
+  width: 100%;
+  max-width: 100%; /* prevent overflow */
+  overflow: hidden; /* cut off any stray overflow */
+}
+
+.form-container form {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix grid inside the form so it scales properly */
+.form-container .form-grid {
+  width: 100%;
+  max-width: 100%;
+}
+
+.mobilecard{
+  display: none;
+}
+
+/* phone */
+@media (max-width: 767px) {
+   .grid-layout {
+    grid-template-columns: 1fr; 
+  }
+
+  .card{
+    display: none;
+  }
+
+  .mobilecard {
+    display: block; 
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .mobilecard{
+    display: none;
+  }
+
+   .grid-layout {
+    display: flex;         /* or grid */
+    flex-direction: column; /* stack vertically */
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;  /* take full width */
+  }
+}
+
+/* Large screen (up to 1600px) -> stack panels */
+@media (max-width: 1600px) {
+  .grid-layout {
+    display: flex;
+    flex-direction: column; 
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%; 
+  }
+}
+
 </style>
