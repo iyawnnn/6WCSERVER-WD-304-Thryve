@@ -21,7 +21,7 @@
           {{ slotProps.data.duration }} min
         </template>
       </Column>
-      <Column field="calories" header="Calories">
+      <Column field="calories" header="Burned">
         <template #body="slotProps">
           {{ slotProps.data.calories }} cal
         </template>

@@ -1,7 +1,12 @@
 <template>
   <div class="login-page">
-    <!-- Left Column: Form -->
     <div class="login-form-container">
+      <div class="back-home">
+        <router-link to="/" class="back-link">
+          <i class="bi bi-arrow-left"></i> Back to Home
+        </router-link>
+      </div>
+
       <div class="login-card">
         <div class="login-header">
           <h1 class="login-title">Login</h1>
@@ -105,5 +110,55 @@ const login = async () => {
 </script>
 
 <style scoped>
+.login-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative; 
+}
+
+.back-home {
+  position: absolute;
+  top: 3rem;  
+  left: 4rem;  
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  color: var(--foreground);
+  text-decoration: none; 
+  font-size: 1rem;
+  transition: color 0.3s, border-bottom 0.3s; 
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px; 
+}
+
+.back-link i {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.back-link:hover {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+@media (max-width: 500px) {
+  .back-home {
+    top: 1.5rem;   
+    left: 1.5rem;   
+  }
+
+  .back-link {
+    font-size: 0.9rem; 
+  }
+
+  .back-link i {
+    font-size: 1rem; 
+  }
+}
 
 </style>

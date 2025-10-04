@@ -236,7 +236,7 @@ onMounted(async () => {
               <div class="stat-value">{{ w.duration }} min</div>
             </div>
             <div class="stat">
-              <div class="stat-label">Calories</div>
+              <div class="stat-label">Burned</div>
               <div class="stat-value calories">{{ w.calories }} cal</div>
             </div>
           </div>

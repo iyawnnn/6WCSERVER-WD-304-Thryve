@@ -211,6 +211,7 @@ onUnmounted(() => {
 <style scoped>
 h4 {
   font-size:1.5rem;
+  margin-bottom:1rem;
 }
 
 .grid-layout {
