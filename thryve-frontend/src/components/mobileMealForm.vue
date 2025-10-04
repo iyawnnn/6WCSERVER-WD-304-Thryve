@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import api from "../utils/api";
 import { meals } from "../composables/useMeals.js";
-import { useToast } from "primevue/usetoast"; // ✅ PrimeVue toast composable
+import { useToast } from "primevue/usetoast"; 
 
 const toast = useToast();
 const emit = defineEmits(["mealAdded"]);
@@ -10,7 +10,7 @@ const emit = defineEmits(["mealAdded"]);
 const foodName = ref("");
 const calories = ref(null);
 const protein = ref(null);
-const date = ref(new Date().toISOString().split("T")[0]); // ✅ today's date (yyyy-mm-dd)
+const date = ref(new Date().toISOString().split("T")[0]);
 const today = new Date().toISOString().split("T")[0];
 const isLoading = ref(false);
 
@@ -61,12 +61,10 @@ const addMeal = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="addMeal" class="form-grid">
-    <h1>Add Meal</h1>
-
-    <!-- Row 1: Meal Info -->
-    <div class="form-row three-cols">
-      <div class="input-group">
+  <form @submit.prevent="addMeal" class="form-grid mobile-form">
+    <!-- Row 1: Meal Name -->
+    <div class="form-row full">
+      <div class="input-group full">
         <label class="input-label">Meal Name</label>
         <input 
           v-model="foodName"
@@ -75,7 +73,11 @@ const addMeal = async () => {
           :disabled="isLoading"
         />
       </div>
-      <div class="input-group">
+    </div>
+
+    <!-- Row 2: Calories -->
+    <div class="form-row full">
+      <div class="input-group full">
         <label class="input-label">Calories</label>
         <input 
           v-model.number="calories"
@@ -85,7 +87,11 @@ const addMeal = async () => {
           :disabled="isLoading"
         />
       </div>
-      <div class="input-group">
+    </div>
+
+    <!-- Row 3: Protein -->
+    <div class="form-row full">
+      <div class="input-group full">
         <label class="input-label">Protein (g)</label>
         <input 
           v-model.number="protein"
@@ -97,8 +103,8 @@ const addMeal = async () => {
       </div>
     </div>
 
-    <!-- Row 2: Date Picker -->
-    <div class="form-row">
+    <!-- Row 4: Meal Date -->
+    <div class="form-row full">
       <div class="input-group full">
         <label class="input-label">Meal Date</label>
         <div class="input-wrapper">
@@ -113,8 +119,8 @@ const addMeal = async () => {
       </div>
     </div>
 
-    <!-- Row 3: Submit Button -->
-    <div class="form-row">
+    <!-- Row 5: Submit Button -->
+    <div class="form-row full">
       <button 
         type="submit" 
         class="btn-submit"
@@ -140,10 +146,12 @@ form {
 
 .input-label {
   display: block;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 500;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.75rem;
   color: var(--foreground);
+  margin-top:1rem;
+  margin-left:0.5rem;
 }
 
 input[type="text"],
@@ -176,7 +184,7 @@ input:focus {
 .input-wrapper input[type="date"] {
   width: 100%;
   height: 42px;
-  padding-right: 2.5rem; /* space for calendar icon */
+  padding-right: 2.5rem; 
   cursor: pointer;
 }
 
@@ -184,7 +192,7 @@ input:focus {
   position: absolute;
   right: 2rem;
   color: var(--muted-foreground);
-  pointer-events: none; /* ✅ lets input remain clickable */
+  pointer-events: none;
 }
 
 /* Submit button */

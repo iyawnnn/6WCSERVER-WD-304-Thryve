@@ -1,14 +1,17 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { meals, fetchMeals, deleteMeal as deleteMealApi } from "../composables/useMeals.js";
+import {
+  meals,
+  fetchMeals,
+  deleteMeal as deleteMealApi,
+} from "../composables/useMeals.js";
 import MealEditModal from "./MealEditModal.vue";
 import { useToast } from "primevue/usetoast";
 
-// PrimeVue Components
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 
 const toast = useToast();
 
@@ -55,7 +58,7 @@ const handleDelete = async (id) => {
 
     setTimeout(async () => {
       await deleteMealApi(id);
-      meals.value = meals.value.filter(m => m._id !== id);
+      meals.value = meals.value.filter((m) => m._id !== id);
       deletingRows.value.delete(id);
 
       deleteDialogVisible.value = false;
@@ -86,16 +89,15 @@ onMounted(() => {
 
 const rowClass = (data) => {
   return {
-    "row-highlight": deleteDialogVisible.value && deleteTarget.value?._id === data._id,
-    "row-deleting": deletingRows.value.has(data._id)
+    "row-highlight":
+      deleteDialogVisible.value && deleteTarget.value?._id === data._id,
+    "row-deleting": deletingRows.value.has(data._id),
   };
 };
 </script>
 
 <template>
   <div>
-    <h3>Meal History</h3>
-    
     <DataTable
       v-if="sortedMeals.length > 0"
       :value="sortedMeals"
@@ -118,9 +120,7 @@ const rowClass = (data) => {
         </template>
       </Column>
       <Column field="protein" header="Protein">
-        <template #body="slotProps">
-          {{ slotProps.data.protein }} g
-        </template>
+        <template #body="slotProps"> {{ slotProps.data.protein }} g </template>
       </Column>
       <Column field="date" header="Date">
         <template #body="slotProps">
@@ -145,7 +145,10 @@ const rowClass = (data) => {
       </Column>
     </DataTable>
 
-    <p v-else>No meals yet.</p>
+    <div v-else class="empty-state-desktop">
+      <h4>No Meals Yet</h4>
+      <p>Start tracking your nutrition by adding your first meal!</p>
+    </div>
 
     <!-- Edit Modal -->
     <MealEditModal
@@ -186,6 +189,26 @@ const rowClass = (data) => {
 </template>
 
 <style scoped>
+.empty-state-desktop {
+  text-align: center;
+  padding: 7.6rem 1rem;
+  color: var(--muted-foreground);
+}
+
+.empty-state-desktop h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.empty-state-desktop p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #737373;
+  font-weight: 400;
+}
+
 h3 {
   font-size: 2rem;
 }
@@ -199,11 +222,16 @@ h3 {
 }
 
 @keyframes fadeOutRow {
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(-20px); }
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
 }
 
-/* Confirmation dialog */
 .confirmation-content {
   display: flex;
   align-items: center;
@@ -224,5 +252,13 @@ h3 {
   color: var(--foreground);
 }
 
-/* Buttons inherit WorkoutHistory styles */
+.action-buttons :deep(.p-button.p-button-text.p-button-secondary:hover) {
+  background: var(--muted);
+  color: var(--primary);
+}
+
+.action-buttons :deep(.p-button.p-button-text.p-button-danger:hover) {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
 </style>

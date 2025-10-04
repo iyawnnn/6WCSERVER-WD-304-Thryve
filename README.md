@@ -1,150 +1,83 @@
-# Thryve — Fitness & Health Tracker
+# Thryve - Health and Fitness Web Application
 
-Thryve is a full-stack Fitness & Health Tracker app built with **Vue 3 + Vite frontend** and **Node.js + Express backend**, using **MongoDB Atlas** as the database. Users can register, log in, track workouts and meals, and view a simple dashboard.
+## Introduction / Background
+Thryve is a Health and Fitness web application developed using the MEVN stack (MongoDB, Express.js, Vue.js, Node.js). It provides a unified platform for users to manage various aspects of their health and wellness. The application includes functionalities for logging workouts, tracking meals, monitoring water intake, recording sleep patterns, visualizing progress through dashboard analytics, and earning achievements. Thryve also supports essential account management features such as user registration, login, password recovery, and profile customization, ensuring a secure and personalized experience.
 
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Setup & Installation](#setup--installation)
-- [Environment Variables](#environment-variables)
-- [Running Locally](#running-locally)
-- [API Endpoints](#api-endpoints)
-- [Testing](#testing)
-- [Frontend Routes](#frontend-routes)
-- [Deployment Notes](#deployment-notes)
-- [Team Collaboration](#team-collaboration)
-
----
+The main target users are fitness enthusiasts, health-conscious individuals, and anyone seeking structured guidance to maintain a healthy lifestyle. By consolidating multiple health-tracking features into a single platform, Thryve helps users monitor their progress, stay motivated, and achieve their personal wellness goals. Users can customize their profiles and daily targets, including age, height, weight, calorie intake, protein intake, and workout duration.
 
 ## Features
+- User registration, login, and password recovery  
+- Profile management and daily target customization  
+- Workout logging and tracking  
+- Meal tracking and calorie management  
+- Water intake monitoring  
+- Sleep tracking  
+- Dashboard analytics with visual progress insights  
+- Goal setting and achievement tracking  
+- Integrated platform combining multiple health metrics in one place  
 
-- User authentication (register/login)
-- JWT-based session management
-- Workout & meal tracking
-- Dashboard with summary and weekly charts
-- Security: Helmet, CORS, rate limiting
-- Postman collection included for API testing
-- Optional seed user for testing
+## Installation Instructions
+1. Clone the repository:
+```bash
+git clone https://github.com/iyawnnn/6WCSERVER-WD-304-Thryve.git
+```
 
----
-
-## Tech Stack
-
-**Frontend:**
-- Vue 3 + Vite
-- Vue Router
-- Axios
-
-**Backend:**
-- Node.js + Express
-- MongoDB + Mongoose
-- bcryptjs for password hashing
-- JWT for authentication
-- Helmet, CORS, express-rate-limit for security
-
----
-
-## Setup & Installation
-
-1. **Clone the repo**  
-
-git clone <repo-url>
+2. Navigate to the project directory:
+```bash
 cd Thryve
+```
 
-2. **Backend Setup**  
-
+3. Install backend dependencies
+```bash
 cd thryve-backend
 npm install
+```
 
-3. **Frontend Setup**  
-
-cd ../thryve-frontend
-npm install
-
-
-## Environment Variables
-
-Create a .env file in thryve-backend and thryve-frontend if required. Example .env.example:
-
-**Backend (thryve-backend/.env):**
-
-PORT=5000
-
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/thryveDB?retryWrites=true&w=majority
-
-JWT_SECRET=your_long_random_jwt_secret
-
-JWT_EXPIRES_IN=1h
-
-NODE_ENV=development
-
-FRONTEND_ORIGIN=http://localhost:5173
-
-**Frontend (thryve-frontend/.env):**
-
-VITE_API_URL=http://localhost:5000/api
-
-## Running Locally
-
-**Backend:**
-
-cd thryve-backend
-npm run dev
-
-**Frontend:**
-
+4. Install frontend dependencies
+```bash
 cd thryve-frontend
+npm install
+```
 
+5. Create a .env file (backend root) then, fill up the environment variables:
+```bash
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/<dbname>?retryWrites=true&w=majority&appName=<appName>
+JWT_SECRET=<jwt_secret>
+JWT_EXPIRES_IN=1h
+FRONTEND_ORIGIN=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
+EMAIL_USER=<email@example.com>
+EMAIL_PASS=<email_password>
+```
+6. Create a .env file (frontend root) then, fill up the environment variables:
+```bash
+VITE_API_URL=http://localhost:5000/api
+```
+
+## Running the Application
+
+1. Make sure MongoDB is running locally or your cloud MongoDB connection is properly configured in the backend `.env` file.
+
+2. Start the backend server:
+```bash
+cd thryve-backend
 npm run dev
+```
 
-Visit http://localhost:5173 in your browser.
+3. In a seperate terminal, start the frontend server
+```bash
+cd thryve-frontend
+npm run dev
+```
 
-## API Endpoints
+4. Open your web browser and navigate to the frontend URL defined in .env (default: http://localhost:5173) to access the application.
 
-POST /api/auth/register — Register new user
+3. Log in or register a new account, set your profile and daily targets, and start using the features.
 
-POST /api/auth/login — Login with email/password
-
-GET /api/auth/me — Get current user info (requires token)
-
-GET /api/dashboard — Protected dashboard data (requires token)
-
-GET /api/health — Health check endpoint
-
-Use the provided Postman collection (postman_collection.json) to test all endpoints.
-
-
-## Frontend Routes
-
-/register — Registration form
-
-/login — Login form
-
-/dashboard — Protected dashboard (requires token)
-
-Navigation will automatically redirect based on authentication status.
-
-## Deployment Notes
-
-Frontend: Vercel (or Netlify)
-
-Backend: Render (or Heroku)
-
-MongoDB Atlas: Connect backend using MONGO_URI
-
-Ensure FRONTEND_ORIGIN matches deployed frontend URL for CORS.
-
-Health check: /api/health should return { ok: true, version: '0.1.0' } after deployment.
-
-## Team Collaboration
-
-Use feature branches for development. Merge into main after review.
-
-Add new dependencies with npm install and commit package-lock.json.
-
-Use .env.example as reference for environment variables.
-
-Postman collection included to standardize API tests.
+## Usage
+- Register a new account or log in.
+- Customize your profile and set daily targets (calories, protein, workouts).
+- Log workouts, meals, water intake, and sleep patterns.
+- View the dashboard for analytics and track achievements.

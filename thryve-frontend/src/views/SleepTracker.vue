@@ -7,9 +7,13 @@ import { useToast } from "primevue/usetoast";
 
 const toast = useToast();
 const radialChart = ref(null);
+
+const today = new Date();
 const yesterday = new Date();
-yesterday.setDate(yesterday.getDate() - 1);
-const sleepDate = ref(yesterday.toISOString().slice(0, 10));
+yesterday.setDate(today.getDate() - 1);
+
+// Default form date is today
+const sleepDate = ref(today.toISOString().slice(0, 10));
 
 const bedTime = ref("");
 const wakeTime = ref("");
@@ -22,57 +26,33 @@ const sleepNotes = ref("");
 const darkMode = ref(false);
 const focusedField = ref(null);
 
-// Weekly data check
-const hasWeeklyData = computed(
-  () =>
-    Array.isArray(weeklyLogs.value) &&
-    weeklyLogs.value.some((l) => (l.duration || 0) > 0)
-);
+// Helpers
+function getSleepDayKey(dateString) {
+  return new Date(dateString).toISOString().slice(0, 10);
+}
 
-// Recent logs
-const recentLogs = computed(() => {
-  return weeklyLogs.value
-    .filter((l) => l.duration > 0)
-    .sort((a, b) => new Date(b.displayDate) - new Date(a.displayDate))
-    .slice(0, 4);
-});
-
-const weeklyLabels = computed(() => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1...
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7)); // find Monday
-
-  const labels = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    labels.push({
-      date: d,
-      label: d.toLocaleDateString("en-US", { weekday: "short" }),
-    });
-  }
-  return labels;
-});
-
-const weeklyData = computed(() => {
-  return weeklyLabels.value.map((d) => {
-    const log = weeklyLogs.value.find(
-      (l) => new Date(l.displayDate).toDateString() === d.date.toDateString()
-    );
-    return log ? Number(((log.duration || 0) / 60).toFixed(1)) : 0;
+function formatLogDate(dateString) {
+  const d = new Date(dateString);
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   });
-});
-
-// Focus management
-function setFocusedField(field) {
-  focusedField.value = field;
-}
-function clearFocusedField(field) {
-  if (focusedField.value === field) focusedField.value = null;
 }
 
-// Toast notification
+function toLocalDateString(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getDisplayDate(bedTimeISO, wakeTimeISO) {
+  const wake = new Date(wakeTimeISO);
+  return toLocalDateString(wake);
+}
+
+// Toast notifications
 function triggerNotification(message, type = "success") {
   toast.add({
     severity: type,
@@ -82,14 +62,17 @@ function triggerNotification(message, type = "success") {
   });
 }
 
-// Computed properties
-const todayString = computed(() => new Date().toISOString().slice(0, 10));
+// Focus management
+function setFocusedField(field) {
+  focusedField.value = field;
+}
+function clearFocusedField(field) {
+  if (focusedField.value === field) focusedField.value = null;
+}
 
-const yesterdayString = computed(() => {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
-});
+// Computed
+const todayString = computed(() => today.toISOString().slice(0, 10));
+const yesterdayString = computed(() => yesterday.toISOString().slice(0, 10));
 
 const computedDuration = computed(() => {
   if (!bedTime.value || !wakeTime.value) return 0;
@@ -114,7 +97,47 @@ const feedbackText = computed(() => {
   return "Keep consistent for better rest.";
 });
 
-// Weekly chart calculations
+const weeklyLabels = computed(() => {
+  const dayOfWeek = today.getDay(); // Sunday = 0
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((dayOfWeek + 6) % 7));
+
+  const labels = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    labels.push({
+      date: d,
+      label: d.toLocaleDateString("en-US", { weekday: "short" }),
+    });
+  }
+  return labels;
+});
+
+const weeklyData = computed(() => {
+  return weeklyLabels.value.map((d) => {
+    const log = weeklyLogs.value.find(
+      (l) => getSleepDayKey(l.displayDate) === getSleepDayKey(d.date)
+    );
+    return log ? Number(((log.duration || 0) / 60).toFixed(1)) : 0;
+  });
+});
+
+// Recent logs (combine multiple logs per day)
+const recentLogs = computed(() => {
+  const dailyMap = {};
+  weeklyLogs.value.forEach((log) => {
+    const key = getSleepDayKey(log.displayDate);
+    if (!dailyMap[key]) dailyMap[key] = { ...log };
+    else dailyMap[key].duration += log.duration;
+  });
+
+  return Object.values(dailyMap)
+    .sort((a, b) => new Date(b.displayDate) - new Date(a.displayDate))
+    .slice(0, 4);
+});
+
+// Weekly average & consistency
 const weeklyAverageDuration = computed(() => {
   const valid = weeklyLogs.value.filter((l) => l.duration > 0);
   if (!valid.length) return "0.0";
@@ -125,189 +148,77 @@ const weeklyAverageDuration = computed(() => {
 const sleepConsistencyScore = computed(() => {
   if (!weeklyLogs.value.length) return 0;
 
-  // Group logs by date (YYYY-MM-DD)
   const dailyBedTimes = {};
-  weeklyLogs.value.forEach(l => {
+  weeklyLogs.value.forEach((l) => {
     if (!l.bedTime) return;
     const d = new Date(l.bedTime);
-    const localDate = d.toLocaleDateString("en-CA"); // YYYY-MM-DD
-    if (!dailyBedTimes[localDate] || d < dailyBedTimes[localDate]) {
-      dailyBedTimes[localDate] = d;
-    }
+    const key = getSleepDayKey(d);
+    if (!dailyBedTimes[key] || d < dailyBedTimes[key]) dailyBedTimes[key] = d;
   });
 
   const bedTimesArray = Object.values(dailyBedTimes);
   if (bedTimesArray.length < 2) return 0;
 
-  // Convert bedTimes to minutes
-  const minutes = bedTimesArray.map(d => d.getHours() * 60 + d.getMinutes());
-
-  // Compute mean & std deviation
+  const minutes = bedTimesArray.map((d) => d.getHours() * 60 + d.getMinutes());
   const mean = minutes.reduce((a, b) => a + b, 0) / minutes.length;
   const std = Math.sqrt(
-    minutes.map(x => (x - mean) ** 2).reduce((a, b) => a + b, 0) / minutes.length
+    minutes.map((x) => (x - mean) ** 2).reduce((a, b) => a + b, 0) / minutes.length
   );
 
-  // Map std deviation to 0-100 consistency (0 = very irreg, 100 = perfect)
   return Math.max(0, Math.min(100, Math.round(100 - (std / 180) * 100)));
 });
 
 // ApexCharts options
 const circularOptions = computed(() => ({
-  chart: {
-    type: "radialBar",
-    sparkline: { enabled: true },
-    foreColor: darkMode.value ? "#f9fafb" : "#111827",
-    animations: { enabled: true, easing: "easeinout", speed: 800 },
-  },
-  plotOptions: {
-    radialBar: {
-      hollow: { size: "70%" },
-      track: {
-        background: darkMode.value ? "#374151" : "#e5e7eb",
-        strokeWidth: "100%",
-      },
-      dataLabels: { show: false },
-    },
-  },
+  chart: { type: "radialBar", sparkline: { enabled: true }, foreColor: darkMode.value ? "#f9fafb" : "#111827", animations: { enabled: true, easing: "easeinout", speed: 800 } },
+  plotOptions: { radialBar: { hollow: { size: "70%" }, track: { background: darkMode.value ? "#374151" : "#e5e7eb", strokeWidth: "100%" }, dataLabels: { show: false } } },
   fill: { colors: [darkMode.value ? "#60a5fa" : "#000000"] },
   stroke: { lineCap: "round", width: 3 },
   labels: ["Progress"],
 }));
 
-// Chart series & options for weekly insights
-const chartSeries = computed(() => [
-  { name: "Sleep (hrs)", data: weeklyData.value },
-]);
-
+const chartSeries = computed(() => [{ name: "Sleep (hrs)", data: weeklyData.value }]);
 const chartOptions = computed(() => ({
-  chart: {
-    toolbar: { show: false },
-    animations: { enabled: true },
-    foreColor: darkMode.value ? "#f9fafb" : "#111827",
-  },
+  chart: { toolbar: { show: false }, animations: { enabled: true }, foreColor: darkMode.value ? "#f9fafb" : "#111827" },
   dataLabels: { enabled: false },
   stroke: { curve: "smooth", width: 2, colors: ["#000000"] },
-  markers: {
-    size: 0,
-    hover: {
-      size: 6,
-      fillColor: "#000000",
-      strokeColor: "#000000",
-      strokeWidth: 2,
-    },
-  },
-  fill: {
-    type: "gradient",
-    gradient: {
-      shade: "dark",
-      type: "vertical",
-      gradientToColors: ["#1f2937"],
-      shadeIntensity: 1,
-      inverseColors: false,
-      opacityFrom: 0.2,
-      opacityTo: 0.1,
-      stops: [0, 100],
-    },
-  },
-  xaxis: {
-    categories: weeklyLabels.value.map((d) => d.label),
-    labels: {
-      style: {
-        colors: darkMode.value ? "#9ca3af" : "#6b7280",
-        fontSize: "12px",
-      },
-    },
-  },
-  yaxis: {
-    min: 0,
-    max: 12,
-    tickAmount: 4,
-    labels: {
-      formatter: (v) => `${v}h`,
-      style: { colors: darkMode.value ? "#9ca3af" : "#6b7280" },
-    },
-  },
-  tooltip: {
-    theme: darkMode.value ? "dark" : "light",
-    marker: { show: true, fillColors: ["#000000"] },
-    y: { formatter: (v) => `${v} hrs` },
-  },
-  grid: {
-    borderColor: darkMode.value ? "#374151" : "#e5e7eb",
-    strokeDashArray: 4,
-  },
+  markers: { size: 0, hover: { size: 6, fillColor: "#000000", strokeColor: "#000000", strokeWidth: 2 } },
+  fill: { type: "gradient", gradient: { shade: "dark", type: "vertical", gradientToColors: ["#1f2937"], shadeIntensity: 1, inverseColors: false, opacityFrom: 0.2, opacityTo: 0.1, stops: [0, 100] } },
+  xaxis: { categories: weeklyLabels.value.map((d) => d.label), labels: { style: { colors: darkMode.value ? "#9ca3af" : "#6b7280", fontSize: "12px" } } },
+  yaxis: { min: 0, max: 12, tickAmount: 4, labels: { formatter: (v) => `${v}h`, style: { colors: darkMode.value ? "#9ca3af" : "#6b7280" } } },
+  tooltip: { theme: darkMode.value ? "dark" : "light", marker: { show: true, fillColors: ["#000000"] }, y: { formatter: (v) => `${v} hrs` } },
+  grid: { borderColor: darkMode.value ? "#374151" : "#e5e7eb", strokeDashArray: 4 },
 }));
 
-// Helpers
-function formatLogDate(dateString) {
-  const d = new Date(dateString);
-  return d.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-}
+const hasWeeklyData = computed(() =>
+  Array.isArray(weeklyLogs.value) && weeklyLogs.value.some((l) => (l.duration || 0) > 0)
+);
 
-// Convert a Date object to local YYYY-MM-DD
-function toLocalDateString(d) {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-// Compute display date logic for Recent Activity
-function getDisplayDate(bedTimeISO, wakeTimeISO) {
-  const wake = new Date(wakeTimeISO);
-  return toLocalDateString(wake);
-}
-
-// Fetch today’s log
+// Fetch logs
 async function fetchToday() {
   try {
     const res = await api.get("/sleep/today");
     todayLog.value = res.data?.duration
-      ? {
-          ...res.data,
-          displayDate: getDisplayDate(res.data.bedTime, res.data.wakeTime),
-        }
-      : {
-          duration: 0,
-          date: todayString.value,
-          displayDate: todayString.value,
-        };
+      ? { ...res.data, displayDate: getDisplayDate(res.data.bedTime, res.data.wakeTime) }
+      : { duration: 0, date: todayString.value, displayDate: todayString.value };
   } catch {
-    todayLog.value = {
-      duration: 0,
-      date: todayString.value,
-      displayDate: todayString.value,
-    };
+    todayLog.value = { duration: 0, date: todayString.value, displayDate: todayString.value };
   }
 }
 
-// Fetch all logs
 async function fetchWeekly() {
   try {
     const res = await api.get("/sleep/weekly");
     const logs = res.data || [];
-
     weeklyLogs.value = logs
-      .map((l) => ({
-        ...l,
-        displayDate: l.displayDate || getDisplayDate(l.bedTime, l.wakeTime),
-      }))
-      .sort((a, b) => new Date(b.displayDate) - new Date(a.displayDate))
-      .filter(
-        (v, i, arr) =>
-          !arr.slice(0, i).some((x) => x.displayDate === v.displayDate)
-      );
+      .map((l) => ({ ...l, displayDate: l.displayDate || getDisplayDate(l.bedTime, l.wakeTime) }))
+      .sort((a, b) => new Date(b.displayDate) - new Date(a.displayDate));
   } catch {
     weeklyLogs.value = [];
   }
 }
 
-// Add sleep log
+// Add sleep log (combine durations if same day)
 async function addSleepLog() {
   if (!bedTime.value || !wakeTime.value) {
     triggerNotification("Please fill in both bed time and wake time.", "error");
@@ -320,31 +231,31 @@ async function addSleepLog() {
     let wakeDate = new Date(`${sleepDate.value}T${wakeTime.value}`);
     if (wakeDate <= bedDate) wakeDate.setDate(wakeDate.getDate() + 1);
 
+    const duration = (wakeDate - bedDate) / (1000 * 60);
+
     const payload = {
       bedTime: bedDate.toISOString(),
       wakeTime: wakeDate.toISOString(),
-      duration: (wakeDate - bedDate) / (1000 * 60),
+      duration,
       quality: sleepQuality.value,
       notes: sleepNotes.value,
     };
 
     const res = await api.post("/sleep", payload);
     const log = res.data;
-
-    const displayDate =
-      log.displayDate || getDisplayDate(log.bedTime, log.wakeTime);
+    const displayDate = log.displayDate || getDisplayDate(log.bedTime, log.wakeTime);
     log.displayDate = displayDate;
 
-    const index = weeklyLogs.value.findIndex(
-      (l) => l.displayDate === displayDate
-    );
-    if (index > -1) {
-      weeklyLogs.value[index] = log;
+    const existingIndex = weeklyLogs.value.findIndex((l) => l.displayDate === displayDate);
+    if (existingIndex > -1) {
+      weeklyLogs.value[existingIndex].duration += duration;
     } else {
       weeklyLogs.value.push(log);
     }
 
-    if (displayDate === todayString.value) todayLog.value = log;
+    if (displayDate === todayString.value) {
+      todayLog.value.duration = (todayLog.value.duration || 0) + duration;
+    }
 
     triggerNotification("Sleep log saved!");
     bedTime.value = "";
@@ -374,6 +285,7 @@ onMounted(async () => {
   await fetchToday();
 });
 </script>
+
 
 
 <template>
@@ -439,7 +351,7 @@ onMounted(async () => {
                       <input
                         type="date"
                         v-model="sleepDate"
-                        :max="yesterdayString"
+                        :max="todayString"
                         required
                         @focus="setFocusedField('date')"
                         @blur="clearFocusedField('date')"

@@ -14,19 +14,19 @@ import SleepTracker from "../views/SleepTracker.vue";
 import NotFound from "../views/NotFound.vue"; 
 
 const routes = [
-  { path: "/", component: Home },
-  { path: "/login", component: Login },
-  { path: "/register", component: Register },
-  { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
-  { path: "/meals", component: Meals, meta: { requiresAuth: true } },
-  { path: "/workouts", component: Workouts, meta: { requiresAuth: true } },
-  { path: "/forgot-password", component: ForgotPassword },
-  { path: "/reset-password/:token", component: ResetPassword },
-  { path: "/profile", component: Profile, meta: { requiresAuth: true } },
-  { path: "/achievements", component: Achievements, meta: { requiresAuth: true } },
-  { path: "/water", component: WaterTracker, meta: { requiresAuth: true }},
-  { path: "/sleep", component: SleepTracker, meta: { requiresAuth: true } },
-  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
+  { path: "/", component: Home, meta: { title: "Thryve - Home" } },
+  { path: "/login", component: Login, meta: { title: "Thryve - Login" } },
+  { path: "/register", component: Register, meta: { title: "Thryve - Register" } },
+  { path: "/dashboard", component: Dashboard, meta: { title: "Thryve - Dashboard", requiresAuth: true } },
+  { path: "/meals", component: Meals, meta: { title: "Thryve - Meals", requiresAuth: true } },
+  { path: "/workouts", component: Workouts, meta: { title: "Thryve - Workouts", requiresAuth: true } },
+  { path: "/forgot-password", component: ForgotPassword, meta: { title: "Thryve - Forgot Password" } },
+  { path: "/reset-password/:token", component: ResetPassword, meta: { title: "Thryve - Reset Password" } },
+  { path: "/profile", component: Profile, meta: { title: "Thryve - Profile", requiresAuth: true } },
+  { path: "/achievements", component: Achievements, meta: { title: "Thryve - Achievements", requiresAuth: true } },
+  { path: "/water", component: WaterTracker, meta: { title: "Thryve - Water Tracker", requiresAuth: true } },
+  { path: "/sleep", component: SleepTracker, meta: { title: "Thryve - Sleep Tracker", requiresAuth: true } },
+  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound, meta: { title: "Thryve - Page Not Found" } },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });
@@ -42,5 +42,11 @@ router.beforeEach((to, from, next) => {
 
   next();
 });
+
+// After auth guard
+router.afterEach((to) => {
+  document.title = to.meta.title || "Thryve";
+});
+
 
 export default router;

@@ -8,9 +8,9 @@ import { useAuthStore } from "../stores/auth";
 // PrimeVue
 import CascadeSelect from "primevue/cascadeselect";
 import DatePicker from "primevue/datepicker";
-import { useToast } from "primevue/usetoast"; // ✅ import
+import { useToast } from "primevue/usetoast"; 
 
-const toast = useToast(); // ✅ initialize
+const toast = useToast(); 
 
 const auth = useAuthStore();
 const userWeight = computed(() => auth.user?.weight);
@@ -84,7 +84,6 @@ const updateWorkoutHandler = async () => {
 
     await updateWorkout(props.workout._id, workoutData);
 
-    // ✅ success toast
     toast.add({
       severity: "success",
       summary: "Workout Updated",
@@ -96,7 +95,6 @@ const updateWorkoutHandler = async () => {
   } catch (error) {
     console.error("Update error:", error);
 
-    // ❌ error toast
     toast.add({
       severity: "error",
       summary: "Update Failed",
@@ -362,8 +360,6 @@ input:focus,
   color: var(--foreground) !important;
 }
 
-
-/* Override PrimeVue DatePicker CSS variables to match your design */
 :deep(.p-datepicker) {
   --p-datepicker-dropdown-border-radius: var(--radius) !important;
   border-radius: var(--radius) !important;
@@ -383,13 +379,11 @@ input:focus,
   color: var(--foreground) !important;
 }
 
-/* Focus states */
 :deep(.p-datepicker:focus-within .p-inputtext),
 :deep(.p-datepicker:focus-within .p-datepicker-dropdown) {
   border-color: var(--primary) !important;
 }
 
-/* === Responsive === */
 @media (max-width: 600px) {
   .form-row.three-cols > .input-group {
     flex: 1 1 100%;

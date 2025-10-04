@@ -25,7 +25,6 @@
       <!-- Right side: Summary + Analytics -->
       <div class="right-panel">
         <section class="card">
-          <h4>Summary</h4>
           <div class="summary-cards">
             <div class="summary-box">
               <p>Total Meals</p>
@@ -51,12 +50,8 @@
       </div>
     </div>
 
-
-
     <!-- RESPONSIVE MOBILE -->
     <div class="meal-page">
-    <!-- Desktop/Tablet version -->
-    <!-- <MealForm class="desktop-form" @mealAdded="onMealAdded" /> -->
 
     <!-- Mobile version -->
     <MobileMealForm class="mobile-form" @mealAdded="onMealAdded" />
@@ -107,15 +102,29 @@ const parseDateSafe = (raw) => {
 };
 
 const buildChartData = (items) => {
-  const grouped = {};
+  const today = new Date();
+  const last7Days = [];
+
+  // Build last 7 days labels
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    // Format: "Month Day" (e.g., "Oct 4")
+    last7Days.push(d.toLocaleDateString(undefined, { month: "short", day: "numeric" }));
+  }
+
+  // Map calories per day
+  const caloriesMap = {};
   items.forEach((m) => {
     const d = parseDateSafe(m.date);
-    const label = d ? d.toLocaleDateString() : "Unknown";
-    grouped[label] = (grouped[label] || 0) + (Number(m.calories) || 0);
+    if (!d) return;
+    const label = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    caloriesMap[label] = (caloriesMap[label] || 0) + (Number(m.calories) || 0);
   });
-  const labels = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
-  const data = labels.map((l) => grouped[l]);
-  return { labels, data };
+
+  const data = last7Days.map((label) => caloriesMap[label] || 0);
+
+  return { labels: last7Days, data };
 };
 
 const destroyChart = () => {
@@ -199,6 +208,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+h4 {
+  font-size:1.5rem;
+  margin-bottom:0.75rem;
+}
+
 .grid-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;

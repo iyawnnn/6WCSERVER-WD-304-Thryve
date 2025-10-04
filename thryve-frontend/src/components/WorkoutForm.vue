@@ -160,6 +160,8 @@ const addWorkoutHandler = async () => {
 </template>
 
 <style scoped>
+
+
 .calories-hint {
   color: var(--muted-foreground);
   font-size: 0.8rem;
@@ -207,7 +209,6 @@ input[type="date"],
   transition: border 0.2s ease, background 0.2s ease;
 }
 
-/* Focus states */
 input:focus {
   outline: none;
   border-color: var(--primary);
@@ -224,7 +225,6 @@ input:focus {
   box-shadow: none !important;
 }
 
-/* Make DatePicker input flexible */
 :deep(.p-datepicker .p-inputtext) {
   width: 100% !important;
   height: 42px !important;
@@ -232,7 +232,6 @@ input:focus {
   border-radius: var(--radius) 0 0 var(--radius) !important;
 }
 
-/* DatePicker button */
 :deep(.p-datepicker .p-datepicker-trigger) {
   border: 1px solid var(--border) !important;
   border-left: none !important;
@@ -242,8 +241,6 @@ input:focus {
   cursor: pointer;
 }
 
-/* Submit button */
-/* Make the submit button span full width */
 .form-row button.btn-submit {
   width: 100%;
 }
@@ -295,7 +292,6 @@ input:focus {
   width: 100%;
 }
 
-/* Override PrimeVue DatePicker CSS variables to match your design */
 :deep(.p-datepicker) {
   --p-datepicker-dropdown-border-radius: var(--radius) !important;
   border-radius: var(--radius) !important;
@@ -332,14 +328,14 @@ input:focus {
 
 .form-row.three-cols {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 equal-width columns */
+  grid-template-columns: repeat(3, 1fr); 
   gap: 1rem;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  width: 100%; /* ensures each fills its grid cell */
+  width: 100%; 
 }
 
 .calories-output {
@@ -350,14 +346,12 @@ input:focus {
   cursor: default;                   
 }
 
-/* remove focus ring */
 .calories-output:focus {
   outline: none;
   border-color: var(--border);
   box-shadow: none;
 }
 
-/* Remove shadow just for DatePicker input */
 :deep(.p-datepicker .p-inputtext) {
   box-shadow: none !important;
 }
@@ -373,16 +367,14 @@ input:focus {
 }
 
 .form-row.three-cols .input-group {
-  min-width: 0; /* allow shrinking inside grid */
+  min-width: 0; 
 }
 
-/* 📱 Prevent form overflow inside card */
 form.form-grid {
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Make sure submit button stays inside card */
 form .btn-submit {
   display: block;
   width: 100%;
@@ -403,4 +395,13 @@ form .btn-submit {
   
 }
 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 </style>

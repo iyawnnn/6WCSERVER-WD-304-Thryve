@@ -1,13 +1,11 @@
 <template>
   <div>
-    <h3>Workout Log</h3>
-    
-    <DataTable 
+    <DataTable
       v-if="sortedWorkouts.length > 0"
-      :value="sortedWorkouts" 
+      :value="sortedWorkouts"
       paginator
       :rows="6"
-      :rowsPerPageOptions="[6, 12, 24, 50]" 
+      :rowsPerPageOptions="[6, 12, 24, 50]"
       paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
       currentPageReportTemplate="{first} to {last} of {totalRecords}"
       tableStyle="min-width: 50rem"
@@ -36,34 +34,37 @@
       <Column header="Actions" style="width: 120px">
         <template #body="slotProps">
           <div class="action-buttons">
-            <Button 
-              icon="pi pi-pencil" 
-              class="p-button-text p-button-sm p-button-secondary" 
-              @click="editWorkout(slotProps.data)" 
+            <Button
+              icon="pi pi-pencil"
+              class="p-button-text p-button-sm p-button-secondary"
+              @click="editWorkout(slotProps.data)"
             />
-            <Button 
-              icon="pi pi-trash" 
-              class="p-button-text p-button-sm p-button-danger" 
-              @click="confirmDelete(slotProps.data)" 
+            <Button
+              icon="pi pi-trash"
+              class="p-button-text p-button-sm p-button-danger"
+              @click="confirmDelete(slotProps.data)"
             />
           </div>
         </template>
       </Column>
     </DataTable>
 
-    <p v-else>No workouts yet.</p>
+    <div v-else class="empty-state-desktop">
+      <h4>No Workouts Yet</h4>
+      <p>Start tracking your fitness journey by adding your first workout!</p>
+    </div>
 
     <!-- Edit Modal -->
-    <WorkoutEditModal 
-      v-if="editingWorkout" 
-      :workout="editingWorkout" 
-      @close="editingWorkout = null" 
+    <WorkoutEditModal
+      v-if="editingWorkout"
+      :workout="editingWorkout"
+      @close="editingWorkout = null"
     />
 
     <!-- Delete Confirmation Modal -->
-    <Dialog 
-      v-model:visible="deleteDialogVisible" 
-      header="Confirm Delete" 
+    <Dialog
+      v-model:visible="deleteDialogVisible"
+      header="Confirm Delete"
       :modal="true"
       style="width: 350px"
     >
@@ -72,18 +73,18 @@
         <p>Are you sure you want to delete this workout?</p>
       </div>
       <template #footer>
-        <Button 
-          label="No" 
-          icon="pi pi-times" 
-          @click="deleteDialogVisible = false" 
-          class="p-button-text" 
+        <Button
+          label="No"
+          icon="pi pi-times"
+          @click="deleteDialogVisible = false"
+          class="p-button-text"
         />
-        <Button 
-          label="Yes" 
-          icon="pi pi-check" 
-          @click="handleDelete(deleteTarget._id)" 
+        <Button
+          label="Yes"
+          icon="pi pi-check"
+          @click="handleDelete(deleteTarget._id)"
           :disabled="isDeleting"
-          class="p-button-danger confirm-yes" 
+          class="p-button-danger confirm-yes"
           autofocus
         />
       </template>
@@ -93,17 +94,21 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { workouts, deleteWorkout, fetchWorkouts } from "../composables/useWorkouts.js";
+import {
+  workouts,
+  deleteWorkout,
+  fetchWorkouts,
+} from "../composables/useWorkouts.js";
 import WorkoutEditModal from "./WorkoutEditModal.vue";
-import { useToast } from "primevue/usetoast"; 
+import { useToast } from "primevue/usetoast";
 
 // PrimeVue Components
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
 
-const toast = useToast(); 
+const toast = useToast();
 
 const editingWorkout = ref(null);
 const deleteTarget = ref(null);
@@ -143,7 +148,6 @@ const confirmDelete = (workout) => {
 
 const deletingRows = ref(new Set());
 
-
 const handleDelete = async (id) => {
   isDeleting.value = true;
   try {
@@ -177,7 +181,6 @@ const handleDelete = async (id) => {
   }
 };
 
-
 // run initial fetch when component mounts
 onMounted(() => {
   fetchWorkouts();
@@ -185,22 +188,38 @@ onMounted(() => {
 
 const rowClass = (data) => {
   return {
-    "row-highlight": deleteDialogVisible.value && deleteTarget.value?._id === data._id,
-    "row-deleting": deletingRows.value.has(data._id)
+    "row-highlight":
+      deleteDialogVisible.value && deleteTarget.value?._id === data._id,
+    "row-deleting": deletingRows.value.has(data._id),
   };
 };
-
-
-
 </script>
 
-
 <style scoped>
-h3{
+.empty-state-desktop {
+  text-align: center;
+  padding: 7.6rem 1rem;
+  color: var(--muted-foreground);
+}
+
+.empty-state-desktop h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.empty-state-desktop p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #737373;
+  font-weight: 400;
+}
+
+h3 {
   font-size: 2rem;
 }
 
-/* Your existing styles remain the same */
 .workout-table {
   width: 100%;
   border-collapse: collapse;
@@ -305,7 +324,6 @@ h3{
   background-color: rgba(220, 53, 69, 0.1);
 }
 
-/* Target the rows-per-page dropdown inside paginator */
 :deep(.p-paginator .p-dropdown.p-component) {
   border: 1px solid var(--border) !important;
   border-radius: var(--radius) !important;
@@ -314,14 +332,12 @@ h3{
   min-width: 4rem !important;
 }
 
-/* Dropdown label (the "6") */
 :deep(.p-paginator .p-dropdown.p-component .p-dropdown-label) {
   padding: 0.25rem 0.75rem !important;
   font-size: 0.9rem !important;
   color: var(--foreground) !important;
 }
 
-/* Dropdown trigger (the arrow) */
 :deep(.p-paginator .p-dropdown.p-component .p-dropdown-trigger) {
   color: var(--muted-foreground) !important;
 }
@@ -329,19 +345,19 @@ h3{
 /* Focus/active state */
 :deep(.p-paginator .p-dropdown.p-component.p-focus) {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
 }
 
 .confirmation-content {
   display: flex;
   align-items: center;
-  gap: 0.75rem;         /* space between icon and text */
+  gap: 0.75rem;
   padding: 0.5rem 0;
 }
 
 .confirmation-content i {
   font-size: 2rem;
-  color: var(--destructive); /* red highlight */
+  color: var(--destructive);
   flex-shrink: 0;
 }
 
@@ -356,8 +372,8 @@ h3{
   animation: fadeOutRow 0.3s forwards ease-out;
 }
 
-.confirm-yes{
-  color:white;
+.confirm-yes {
+  color: white;
 }
 
 @keyframes fadeOutRow {
@@ -370,5 +386,13 @@ h3{
     transform: translateX(-20px);
   }
 }
+.action-buttons :deep(.p-button.p-button-text.p-button-secondary:hover) {
+  background: var(--muted);
+  color: var(--primary);
+}
 
+.action-buttons :deep(.p-button.p-button-text.p-button-danger:hover) {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+}
 </style>

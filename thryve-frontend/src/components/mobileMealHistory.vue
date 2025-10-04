@@ -1,35 +1,89 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { meals, fetchMeals, deleteMeal as deleteMealApi } from "../composables/useMeals.js";
-import MealEditModal from "./MealEditModal.vue";
+import { meals, deleteMeal, fetchMeals } from "../composables/useMeals.js";
+import { useToast } from "primevue/usetoast";
+import MealEditModal from "../components/MealEditModal.vue";
+
+const toast = useToast();
 
 const editingMeal = ref(null);
 const deleteTarget = ref(null);
 const deleteDialogVisible = ref(false);
 const isDeleting = ref(false);
 const deletingRows = ref(new Set());
+const currentPage = ref(1);
+const mealsPerPage = 5;
+const isEditModalVisible = ref(false);
 
+const editMeal = (meal) => {
+  editingMeal.value = { ...meal };
+  isEditModalVisible.value = true;
+};
+
+// Sort meals (newest first)
 const sortedMeals = computed(() => {
   return [...meals.value].sort((a, b) => {
-    const da = new Date(a.date || 0);
-    const db = new Date(b.date || 0);
-    return db.getTime() - da.getTime();
+    const da = new Date(a.date || a.createdAt || 0);
+    const db = new Date(b.date || b.createdAt || 0);
+    return (isNaN(db) ? 0 : db.getTime()) - (isNaN(da) ? 0 : da.getTime());
   });
+});
+
+// Summary calculations
+const totalMeals = computed(() => sortedMeals.value.length);
+const totalCalories = computed(() =>
+  sortedMeals.value.reduce((sum, meal) => sum + (meal.calories || 0), 0)
+);
+const totalProtein = computed(() =>
+  sortedMeals.value.reduce((sum, meal) => sum + (meal.protein || 0), 0)
+);
+
+// Paginated meals
+const paginatedMeals = computed(() => {
+  const startIndex = (currentPage.value - 1) * mealsPerPage;
+  const endIndex = startIndex + mealsPerPage;
+  return sortedMeals.value.slice(startIndex, endIndex);
+});
+
+// Total pages
+const totalPages = computed(() => {
+  return Math.ceil(sortedMeals.value.length / mealsPerPage);
+});
+
+// Page numbers for pagination
+const pageNumbers = computed(() => {
+  const pages = [];
+  const maxVisiblePages = window.innerWidth <= 768 ? 3 : 5;
+
+  if (totalPages.value <= maxVisiblePages) {
+    for (let i = 1; i <= totalPages.value; i++) pages.push(i);
+  } else {
+    let startPage = currentPage.value - Math.floor(maxVisiblePages / 2);
+    let endPage = currentPage.value + Math.floor(maxVisiblePages / 2);
+
+    if (startPage < 1) {
+      startPage = 1;
+      endPage = maxVisiblePages;
+    }
+    if (endPage > totalPages.value) {
+      endPage = totalPages.value;
+      startPage = totalPages.value - maxVisiblePages + 1;
+    }
+
+    for (let i = startPage; i <= endPage; i++) pages.push(i);
+  }
+
+  return pages;
 });
 
 const formatDate = (dateString) => {
   if (!dateString) return "No Date";
   try {
     const d = new Date(dateString);
-    if (isNaN(d)) return dateString;
-    return d.toLocaleDateString();
-  } catch {
+    return isNaN(d) ? dateString : d.toLocaleDateString();
+  } catch (e) {
     return dateString;
   }
-};
-
-const editMeal = (meal) => {
-  editingMeal.value = { ...meal };
 };
 
 const confirmDelete = (meal) => {
@@ -42,78 +96,213 @@ const handleDelete = async (id) => {
   try {
     deletingRows.value.add(id);
     setTimeout(async () => {
-      await deleteMealApi(id);
-      meals.value = meals.value.filter(m => m._id !== id);
+      await deleteMeal(id);
       deletingRows.value.delete(id);
       deleteDialogVisible.value = false;
+      toast.add({
+        severity: "success",
+        summary: "Deleted",
+        detail: "Meal deleted",
+        life: 2000,
+      });
+      if (paginatedMeals.value.length === 0 && currentPage.value > 1) {
+        currentPage.value--;
+      }
     }, 300);
   } catch (error) {
-    console.error("Delete error:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Failed to delete meal",
+      life: 2500,
+    });
   } finally {
     isDeleting.value = false;
     deleteTarget.value = null;
   }
 };
 
+// Pagination functions
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const handleMealUpdated = (updatedMeal) => {
+  const index = meals.value.findIndex((m) => m._id === updatedMeal.id);
+  if (index !== -1) {
+    meals.value[index] = { ...meals.value[index], ...updatedMeal };
+  }
+};
+
+// Show range of meals being displayed
+const showingRange = computed(() => {
+  const start = (currentPage.value - 1) * mealsPerPage + 1;
+  const end = Math.min(
+    currentPage.value * mealsPerPage,
+    sortedMeals.value.length
+  );
+  return `${start}-${end} of ${sortedMeals.value.length}`;
+});
+
 onMounted(() => {
   fetchMeals();
 });
-
-
-
-const totalMeals = computed(() => meals.value.length);
-const totalCalories = computed(() =>
-  meals.value.reduce((sum, m) => sum + (Number(m.calories) || 0), 0)
-);
-const totalProtein = computed(() =>
-  meals.value.reduce((sum, m) => sum + (Number(m.protein) || 0), 0)
-);
 </script>
 
 <template>
-  <div class="mobile-meal-history">
-    <h1>Meal History</h1>
-
-    <div v-if="sortedMeals.length > 0" class="meal-list">
-      <div
-        v-for="meal in sortedMeals"
-        :key="meal._id"
-        class="meal-card"
-        :class="{
-          highlight: deleteDialogVisible && deleteTarget?._id === meal._id,
-          deleting: deletingRows.has(meal._id)
-        }"
-      >
-        <div class="meal-info">
-          <h4>{{ meal.foodName ?? "—" }}</h4>
-          <p>{{ meal.calories }} cal | {{ meal.protein }} g</p>
-          <small>{{ formatDate(meal.date) }}</small>
-        </div>
-        <div class="meal-actions">
-          <button @click="editMeal(meal)" class="icon-btn">🖊️</button>
-          <button @click="confirmDelete(meal)" class="icon-btn danger">🗑️</button>
-        </div>
+  <div class="mobile-history">
+    <div class="header-section">
+      <h3 class="history-title">Meal Log</h3>
+      <div class="workout-count">
+        {{ totalMeals }} meal{{ totalMeals !== 1 ? "s" : "" }}
       </div>
     </div>
 
-    <p v-else>No meals yet.</p>
+    <!-- Summary Section -->
+    <section class="summary-card">
+      <h4 class="summary-title">Summary</h4>
+      <div class="summary-cards">
+        <div class="summary-box">
+          <p class="summary-label">TOTAL MEALS</p>
+          <h3 class="summary-value">{{ totalMeals }}</h3>
+        </div>
+        <div class="summary-box">
+          <p class="summary-label">TOTAL CALORIES</p>
+          <h3 class="summary-value">{{ totalCalories }} cal</h3>
+        </div>
+        <div class="summary-box full-width">
+          <p class="summary-label-black">TOTAL PROTEIN</p>
+          <h3 class="summary-value">{{ totalProtein }} g</h3>
+        </div>
+      </div>
+    </section>
 
-    <!-- Edit Modal -->
-    <MealEditModal
-      v-if="editingMeal"
-      :meal="editingMeal"
-      @close="editingMeal = null"
-    />
+    <!-- Meals & Pagination Wrapper -->
+    <div v-if="sortedMeals.length > 0">
+      <!-- Pagination Info -->
+      <div class="pagination-info">
+        <span class="showing-text">Showing {{ showingRange }}</span>
+      </div>
 
-    <!-- Delete Confirmation -->
-    <div v-if="deleteDialogVisible" class="modal-overlay">
-      <div class="modal">
-        <h4>Delete Meal?</h4>
-        <p>Are you sure you want to delete <b>{{ deleteTarget?.foodName }}</b>?</p>
-        <div class="modal-actions">
-          <button class="btn cancel" @click="deleteDialogVisible = false">Cancel</button>
+      <!-- Meal Cards -->
+      <div class="workout-cards">
+        <div
+          v-for="m in paginatedMeals"
+          :key="m._id"
+          :class="[
+            'workout-card',
+            {
+              deleting: deletingRows.has(m._id),
+              'pending-delete': deleteTarget && deleteTarget._id === m._id,
+            },
+          ]"
+        >
+          <div class="card-header">
+            <div class="workout-type">{{ m.foodName ?? "—" }}</div>
+            <div class="workout-date">{{ formatDate(m.date) }}</div>
+          </div>
+
+          <div class="card-stats">
+            <div class="stat">
+              <div class="stat-label">Calories</div>
+              <div class="stat-value calories">{{ m.calories }} cal</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Protein</div>
+              <div class="stat-value">{{ m.protein }} g</div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-edit" @click="editMeal(m)">
+              <i class="bi bi-pencil-square"></i>
+              Edit
+            </button>
+            <button class="btn-delete" @click="confirmDelete(m)">
+              <i class="bi bi-trash"></i>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="totalPages > 1" class="pagination-controls">
+        <button
+          class="pagination-btn prev-btn"
+          :disabled="currentPage === 1"
+          @click="prevPage"
+        >
+          <i class="bi bi-chevron-left"></i>
+          Previous
+        </button>
+
+        <div class="page-numbers">
           <button
-            class="btn danger"
+            v-for="page in pageNumbers"
+            :key="page"
+            :class="['page-btn', { active: page === currentPage }]"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span
+            v-if="pageNumbers[pageNumbers.length - 1] < totalPages"
+            class="page-ellipsis"
+          >
+            ...
+          </span>
+        </div>
+
+        <button
+          class="pagination-btn next-btn"
+          :disabled="currentPage === totalPages"
+          @click="nextPage"
+        >
+          Next
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else class="empty-state">
+      <h4>No Meals Yet</h4>
+      <p>Start tracking your nutrition by adding your first meal!</p>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="deleteDialogVisible" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-icon">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <h4>Delete Meal?</h4>
+        <p>Are you sure you want to delete this meal? This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button
+            class="btn-cancel"
+            @click="deleteDialogVisible = false; deleteTarget = null;"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn-confirm-delete"
             :disabled="isDeleting"
             @click="handleDelete(deleteTarget._id)"
           >
@@ -123,199 +312,380 @@ const totalProtein = computed(() =>
       </div>
     </div>
 
-
-    <section class="card">
-          <h1>Summary</h1>
-          <div class="summary-cards">
-            <div class="summary-box">
-              <p>Total Meals</p>
-              <h3>{{ totalMeals }}</h3>
-            </div>
-            <div class="summary-box">
-              <p>Total Calories</p>
-              <h3>{{ totalCalories }} cal</h3>
-            </div>
-            <div class="summary-box full-width">
-              <p>Total Protein</p>
-              <h3>{{ totalProtein }} g</h3>
-            </div>
-          </div>
-        </section>
+    <!-- Edit Modal -->
+    <MealEditModal
+      v-if="editingMeal"
+      :meal="editingMeal"
+      @close="editingMeal = null"
+    />
   </div>
 </template>
 
+
 <style scoped>
-.mobile-meal-history {
-  padding: 1rem;
+.mobile-history {
+  font-family: "Geist", "Poppins", sans-serif;
+  max-width: 100%;
 }
 
-h1 {
-  font-size: 25px;
-  margin-bottom: 1rem;
-}
-
-.meal-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-/* Each meal card */
-.meal-card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 0.75rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+.header-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 1rem;
+  margin-top: 3rem;
 }
 
-.meal-card.highlight {
-  background: rgba(220, 53, 69, 0.1);
-}
-
-.meal-card.deleting {
-  animation: fadeOutRow 0.3s forwards ease-out;
-}
-
-@keyframes fadeOutRow {
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(-20px); }
-}
-
-.meal-info h4 {
+.history-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
   margin: 0;
-  font-size: 1rem;
 }
 
-.meal-info p {
-  margin: 0.25rem 0;
+.workout-count {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
   font-size: 0.85rem;
-  color: #444;
+  font-weight: 500;
 }
 
-.meal-info small {
-  font-size: 0.75rem;
-  color: #777;
+/* Summary */
+.summary-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Action buttons */
-.icon-btn {
-  border: none;
-  background: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.45rem;
-  font-size: 15px;
-}
-
-.icon-btn.danger {
-  color: #dc3545;
-}
-
-/* Mobile modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 320px;
+.summary-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 1rem 0;
   text-align: center;
 }
 
-.modal h4 {
-  margin: 0 0 0.5rem;
+.summary-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.summary-box {
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.summary-box.full-width {
+  grid-column: 1 / -1;
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-hover) 100%
+  );
+  color: var(--primary-foreground);
+}
+
+.summary-label {
+  color: #737373;
+  font-weight: 500;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.summary-label-black {
+  color: #fff;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-weight: 700;
+}
+
+/* Pagination info */
+.pagination-info {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.showing-text {
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+}
+
+/* Cards */
+.workout-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.workout-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between; /* pushes name left, date right */
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.workout-type {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.workout-date {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.card-stats {
+  box-sizing: border-box;
+  column-gap: 1rem;
+  row-gap: 1rem;
+  display: flex;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.stat-value {
   font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.stat-value.calories {
+  color: var(--primary);
+}
+
+/* Actions */
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.card-actions button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  justify-content: center;
+  border: 1px solid var(--border);
+}
+
+.btn-edit {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.btn-edit:hover {
+  background: var(--secondary-hover);
+}
+
+.btn-delete {
+  background: var(--primary);
+  color: var(--destructive-foreground);
+}
+
+.btn-delete:hover {
+  background: var(--destructive-hover);
+}
+
+/* Pagination controls */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+  gap: 0.5rem;
+}
+
+@media (max-width: 400px) {
+  .pagination-btn,
+  .page-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--muted);
+  border-color: var(--primary);
+}
+
+.page-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-btn.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--muted-foreground);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.empty-state p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+}
+
+.modal-icon {
+  font-size: 40px;
+  color: #e74c3c;
+  margin-bottom: 16px;
+}
+
+.modal h4 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .modal p {
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 24px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
 }
 
-.btn {
+.btn-cancel {
   flex: 1;
-  margin: 0 0.25rem;
-  padding: 0.5rem;
+  background: #f0f0f0;
+  color: #333;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-.btn.cancel {
-  background: #ccc;
+.btn-cancel:hover {
+  background: #e0e0e0;
 }
 
-.btn.danger {
-  background: #dc3545;
-  color: white;
+.btn-confirm-delete {
+  flex: 1;
+  background: #e74c3c; /* red */
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+.btn-confirm-delete:hover {
+  background: #c0392b;
+}
 
+.btn-confirm-delete:disabled {
+  background: #f5b7b1;
+  cursor: not-allowed;
+}
 
-
-
-.summary-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.8rem;
-    margin-top: 1rem;
-  }
-
-  /* Each card */
-  .summary-box {
-    background: #fff;
-    border: 1px solid #000;
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease;
-  }
-
-  .summary-box.full-width {
-    grid-column: span 2;
-  }
-
-  /* Interactivity feedback */
-  .summary-box:active {
-    transform: scale(0.98);
-  }
-
-  /* Typography */
-  .summary-box p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  .summary-box h3 {
-    margin-top: 0.4rem;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #000;
-  }
-
-  .card {
-    margin-top: 20px;
-  }
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+}
 </style>

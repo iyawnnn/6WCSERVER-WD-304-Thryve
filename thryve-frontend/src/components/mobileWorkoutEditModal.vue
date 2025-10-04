@@ -82,7 +82,6 @@ const updateWorkoutHandler = async () => {
     emit("workoutUpdated", workoutData);
     emit("update:isVisible", false);
 
-    // ✅ success toast instead of alert
     toast.add({
       severity: "success",
       summary: "Workout Updated",
