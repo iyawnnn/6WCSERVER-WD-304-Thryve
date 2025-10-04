@@ -21,27 +21,52 @@ const date = ref(props.meal.date ? new Date(props.meal.date) : new Date());
 
 const updateMealHandler = async () => {
   if (!foodName.value.trim()) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Food name is required.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Food name is required.",
+      life: 3000,
+    });
     return;
   }
 
   if (!calories.value || calories.value < 0) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Calories must be 0 or higher.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Calories must be 0 or higher.",
+      life: 3000,
+    });
     return;
   }
 
   if (protein.value < 0) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Protein cannot be negative.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Protein cannot be negative.",
+      life: 3000,
+    });
     return;
   }
 
   if (!date.value) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Please select a date.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Please select a date.",
+      life: 3000,
+    });
     return;
   }
 
   if (date.value > today) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Date cannot be in the future.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Date cannot be in the future.",
+      life: 3000,
+    });
     return;
   }
 
@@ -162,11 +187,11 @@ const updateMealHandler = async () => {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1050;
+  z-index: 998;
 }
 
 /* === Modal Dialog === */
@@ -180,7 +205,7 @@ const updateMealHandler = async () => {
   color: var(--card-foreground);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   padding: 1.5rem;
   font-family: "Geist", sans-serif;
 }
@@ -241,7 +266,7 @@ input:focus,
 :deep(.p-inputtext:focus) {
   border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 /* === Buttons === */
@@ -279,6 +304,7 @@ input:focus,
   border-right: none !important;
   border-radius: var(--radius) 0 0 var(--radius) !important;
   height: 42px !important;
+  z-index: 999 !important;
 }
 
 :deep(.p-datepicker-dropdown) {
@@ -286,5 +312,16 @@ input:focus,
   border: 1px solid var(--border) !important;
   background: var(--background) !important;
   color: var(--foreground) !important;
+  z-index: 999 !important;
+}
+
+:deep(input[type="number"]::-webkit-inner-spin-button),
+:deep(input[type="number"]::-webkit-outer-spin-button) {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+:deep(input[type="number"]) {
+  -moz-appearance: textfield;
 }
 </style>

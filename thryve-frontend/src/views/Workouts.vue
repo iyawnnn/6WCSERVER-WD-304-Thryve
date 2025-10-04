@@ -33,7 +33,7 @@
       <!-- Right side: Summary + Analytics -->
       <div class="right-panel">
         <section class="card">
-          <h4>Summary</h4>
+
           <div class="summary-cards">
             <div class="summary-box">
               <p>Total Workouts</p>
@@ -94,17 +94,31 @@ const parseDateSafe = (raw) => {
   return null;
 };
 
+
 const buildChartData = (items) => {
-  const grouped = {};
+  const today = new Date();
+  const last7Days = [];
+
+  // Generate last 7 days labels in "Month Day" format
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    last7Days.push(d.toLocaleDateString(undefined, { month: "short", day: "numeric" }));
+  }
+
+  // Map calories per day
+  const caloriesMap = {};
   items.forEach((w) => {
     const d = parseDateSafe(w.date);
-    const label = d ? d.toLocaleDateString() : "Unknown";
-    grouped[label] = (grouped[label] || 0) + (Number(w.calories) || 0);
+    if (!d) return;
+    const label = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    caloriesMap[label] = (caloriesMap[label] || 0) + (Number(w.calories) || 0);
   });
-  // keep chronological order (old -> new)
-  const labels = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
-  const data = labels.map((l) => grouped[l]);
-  return { labels, data };
+
+  // Fill data for each of last 7 days, 0 if no log
+  const data = last7Days.map((label) => caloriesMap[label] || 0);
+
+  return { labels: last7Days, data };
 };
 
 const destroyChart = () => {
@@ -195,6 +209,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+h4 {
+  font-size:1.5rem;
+}
+
 .grid-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;

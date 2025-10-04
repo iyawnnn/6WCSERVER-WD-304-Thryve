@@ -1,7 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import MobileWorkoutEditModal from "./mobileWorkoutEditModal.vue";
-import { workouts, deleteWorkout, fetchWorkouts } from "../composables/useWorkouts.js";
+import {
+  workouts,
+  deleteWorkout,
+  fetchWorkouts,
+} from "../composables/useWorkouts.js";
 import { useToast } from "primevue/usetoast";
 
 const toast = useToast();
@@ -14,6 +18,7 @@ const deletingRows = ref(new Set());
 const currentPage = ref(1);
 const workoutsPerPage = 5;
 const isEditModalVisible = ref(false);
+const loading = ref(true);
 
 const editWorkout = (workout) => {
   editingWorkout.value = { ...workout };
@@ -31,8 +36,18 @@ const sortedWorkouts = computed(() => {
 
 // Summary calculations
 const totalWorkouts = computed(() => sortedWorkouts.value.length);
-const totalDuration = computed(() => sortedWorkouts.value.reduce((sum, workout) => sum + (workout.duration || 0), 0));
-const totalCalories = computed(() => sortedWorkouts.value.reduce((sum, workout) => sum + (workout.calories || 0), 0));
+const totalDuration = computed(() =>
+  sortedWorkouts.value.reduce(
+    (sum, workout) => sum + (workout.duration || 0),
+    0
+  )
+);
+const totalCalories = computed(() =>
+  sortedWorkouts.value.reduce(
+    (sum, workout) => sum + (workout.calories || 0),
+    0
+  )
+);
 
 // Paginated workouts
 const paginatedWorkouts = computed(() => {
@@ -50,7 +65,7 @@ const totalPages = computed(() => {
 const pageNumbers = computed(() => {
   const pages = [];
   const maxVisiblePages = 5;
-  
+
   if (totalPages.value <= maxVisiblePages) {
     for (let i = 1; i <= totalPages.value; i++) {
       pages.push(i);
@@ -58,12 +73,12 @@ const pageNumbers = computed(() => {
   } else {
     const startPage = Math.max(1, currentPage.value - 2);
     const endPage = Math.min(totalPages.value, startPage + maxVisiblePages - 1);
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
   }
-  
+
   return pages;
 });
 
@@ -90,13 +105,23 @@ const handleDelete = async (id) => {
       await deleteWorkout(id);
       deletingRows.value.delete(id);
       deleteDialogVisible.value = false;
-      toast.add({ severity: "success", summary: "Deleted", detail: "Workout deleted", life: 2000 });
+      toast.add({
+        severity: "success",
+        summary: "Deleted",
+        detail: "Workout deleted",
+        life: 2000,
+      });
       if (paginatedWorkouts.value.length === 0 && currentPage.value > 1) {
         currentPage.value--;
       }
     }, 300);
   } catch (error) {
-    toast.add({ severity: "error", summary: "Error", detail: "Failed to delete workout", life: 2500 });
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Failed to delete workout",
+      life: 2500,
+    });
   } finally {
     isDeleting.value = false;
     deleteTarget.value = null;
@@ -123,7 +148,7 @@ const prevPage = () => {
 };
 
 const handleWorkoutUpdated = (updatedWorkout) => {
-  const index = workouts.value.findIndex(w => w._id === updatedWorkout.id);
+  const index = workouts.value.findIndex((w) => w._id === updatedWorkout.id);
   if (index !== -1) {
     workouts.value[index] = { ...workouts.value[index], ...updatedWorkout };
   }
@@ -132,12 +157,20 @@ const handleWorkoutUpdated = (updatedWorkout) => {
 // Show range of workouts being displayed
 const showingRange = computed(() => {
   const start = (currentPage.value - 1) * workoutsPerPage + 1;
-  const end = Math.min(currentPage.value * workoutsPerPage, sortedWorkouts.value.length);
+  const end = Math.min(
+    currentPage.value * workoutsPerPage,
+    sortedWorkouts.value.length
+  );
   return `${start}-${end} of ${sortedWorkouts.value.length}`;
 });
 
-onMounted(() => {
-  fetchWorkouts();
+// Fetch workouts on mount
+onMounted(async () => {
+  try {
+    await fetchWorkouts();
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
@@ -145,7 +178,9 @@ onMounted(() => {
   <div class="mobile-history">
     <div class="header-section">
       <h3 class="history-title">Workout Log</h3>
-      <div class="workout-count">{{ totalWorkouts }} workout{{ totalWorkouts !== 1 ? 's' : '' }}</div>
+      <div class="workout-count">
+        {{ totalWorkouts }} workout{{ totalWorkouts !== 1 ? "s" : "" }}
+      </div>
     </div>
 
     <!-- Summary Section -->
@@ -167,115 +202,121 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Pagination Info -->
-    <div v-if="sortedWorkouts.length > 0" class="pagination-info">
-      <span class="showing-text">Showing {{ showingRange }}</span>
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-state">
+      <p>Loading workouts...</p>
     </div>
 
-    <div v-if="sortedWorkouts.length > 0" class="workout-cards">
-      <div 
-        v-for="w in paginatedWorkouts" 
-        :key="w._id" 
-        :class="[
-            'workout-card', 
-            { deleting: deletingRows.has(w._id), 'pending-delete': deleteTarget && deleteTarget._id === w._id }
-        ]"
-        >
-        <div class="card-header">
-          <div class="workout-type">{{ w.type ?? "—" }}</div>
-          <div class="workout-date">{{ formatDate(w.date) }}</div>
-        </div>
-        
-        <div class="card-stats">
-          <div class="stat">
-            <div class="stat-label">Duration</div>
-            <div class="stat-value">{{ w.duration }} min</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Calories</div>
-            <div class="stat-value calories">{{ w.calories }} cal</div>
-          </div>
-        </div>
+    <!-- Workout Cards / Empty State -->
+    <div v-else>
+      <div v-if="sortedWorkouts.length > 0" class="pagination-info">
+        <span class="showing-text">Showing {{ showingRange }}</span>
+      </div>
 
-        <div class="card-actions">
-          <button class="btn-edit" @click="editWorkout(w)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
-            Edit
-          </button>
-          <button class="btn-delete" @click="confirmDelete(w)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M3 6h18"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              <path d="M10 11v6"/>
-              <path d="M14 11v6"/>
-            </svg>
-            Delete
-          </button>
+      <div v-if="sortedWorkouts.length > 0" class="workout-cards">
+        <div
+          v-for="w in paginatedWorkouts"
+          :key="w._id"
+          :class="[
+            'workout-card',
+            {
+              deleting: deletingRows.has(w._id),
+              'pending-delete': deleteTarget && deleteTarget._id === w._id,
+            },
+          ]"
+        >
+          <div class="card-header">
+            <div class="workout-type">{{ w.type ?? "—" }}</div>
+            <div class="workout-date">{{ formatDate(w.date) }}</div>
+          </div>
+
+          <div class="card-stats">
+            <div class="stat">
+              <div class="stat-label">Duration</div>
+              <div class="stat-value">{{ w.duration }} min</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Calories</div>
+              <div class="stat-value calories">{{ w.calories }} cal</div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-edit" @click="editWorkout(w)">
+              <i class="bi bi-pencil-square"></i>
+              Edit
+            </button>
+            <button class="btn-delete" @click="confirmDelete(w)">
+              <i class="bi bi-trash"></i>
+              Delete
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Pagination Controls -->
-    <div v-if="totalPages > 1" class="pagination-controls">
-      <button 
-        class="pagination-btn prev-btn" 
-        :disabled="currentPage === 1"
-        @click="prevPage"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M15 18l-6-6 6-6"/>
-        </svg>
-        Previous
-      </button>
-      
-      <div class="page-numbers">
+      <!-- Empty State -->
+      <div v-else class="empty-state">
+        <h4>No Workouts Yet</h4>
+        <p>Start tracking your fitness journey by adding your first workout!</p>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="totalPages > 1" class="pagination-controls">
         <button
-          v-for="page in pageNumbers"
-          :key="page"
-          :class="['page-btn', { active: page === currentPage }]"
-          @click="goToPage(page)"
+          class="pagination-btn prev-btn"
+          :disabled="currentPage === 1"
+          @click="prevPage"
         >
-          {{ page }}
+          Previous
         </button>
-        
-        <span v-if="pageNumbers[pageNumbers.length - 1] < totalPages" class="page-ellipsis">
-          ...
-        </span>
-      </div>
-      
-      <button 
-        class="pagination-btn next-btn" 
-        :disabled="currentPage === totalPages"
-        @click="nextPage"
-      >
-        Next
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </button>
-    </div>
 
-    <div v-else class="empty-state">
-      <div class="empty-icon">💪</div>
-      <h4>No Workouts Yet</h4>
-      <p>Start tracking your fitness journey by adding your first workout!</p>
+        <div class="page-numbers">
+          <button
+            v-for="page in pageNumbers"
+            :key="page"
+            :class="['page-btn', { active: page === currentPage }]"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <span
+            v-if="pageNumbers[pageNumbers.length - 1] < totalPages"
+            class="page-ellipsis"
+          >
+            ...
+          </span>
+        </div>
+
+        <button
+          class="pagination-btn next-btn"
+          :disabled="currentPage === totalPages"
+          @click="nextPage"
+        >
+          Next
+        </button>
+      </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
     <div v-if="deleteDialogVisible" class="modal-backdrop">
       <div class="modal">
-        <div class="modal-icon">🗑️</div>
         <h4>Delete Workout?</h4>
-        <p>Are you sure you want to delete this workout? This action cannot be undone.</p>
+        <p>
+          Are you sure you want to delete this workout? This action cannot be
+          undone.
+        </p>
         <div class="modal-actions">
-          <button class="btn-cancel" @click="deleteDialogVisible = false; deleteTarget = null">
+          <button
+            class="btn-cancel"
+            @click="
+              deleteDialogVisible = false;
+              deleteTarget = null;
+            "
+          >
             Cancel
-        </button>
-
-          <button 
+          </button>
+          <button
             class="btn-confirm-delete"
             :disabled="isDeleting"
             @click="handleDelete(deleteTarget._id)"
@@ -286,12 +327,13 @@ onMounted(() => {
       </div>
     </div>
 
-    <MobileWorkoutEditModal 
-        v-if="editingWorkout"
-        :workout="editingWorkout" 
-        :isVisible="isEditModalVisible"
-        @update:isVisible="isEditModalVisible = $event"
-        @workoutUpdated="handleWorkoutUpdated"
+    <!-- Edit Modal -->
+    <MobileWorkoutEditModal
+      v-if="editingWorkout"
+      :workout="editingWorkout"
+      :isVisible="isEditModalVisible"
+      @update:isVisible="isEditModalVisible = $event"
+      @workoutUpdated="handleWorkoutUpdated"
     />
   </div>
 </template>
@@ -365,7 +407,11 @@ onMounted(() => {
 
 .summary-box.full-width {
   grid-column: 1 / -1;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-hover) 100%
+  );
   color: var(--primary-foreground);
 }
 
@@ -393,7 +439,6 @@ onMounted(() => {
   color: var(--primary-foreground);
 }
 
-/* Pagination Info */
 .pagination-info {
   margin-bottom: 1rem;
   text-align: center;
@@ -526,7 +571,6 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
-/* Pagination Controls */
 .pagination-controls {
   display: flex;
   justify-content: space-between;
@@ -598,7 +642,6 @@ onMounted(() => {
   font-weight: 500;
 }
 
-/* Empty State */
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
@@ -622,7 +665,6 @@ onMounted(() => {
   line-height: 1.5;
 }
 
-/* Modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -647,6 +689,7 @@ onMounted(() => {
 .modal-icon {
   font-size: 2.5rem;
   margin-bottom: 1rem;
+  color: #c0392b;
 }
 
 .modal h4 {
@@ -701,7 +744,6 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* Card that is waiting for delete confirmation */
 .pending-delete {
   border: 2px solid var(--destructive);
   background: rgba(255, 0, 0, 0.05);
@@ -715,75 +757,75 @@ onMounted(() => {
   .mobile-history {
     padding: 0.75rem;
   }
-  
+
   .header-section {
     margin-bottom: 1rem;
   }
-  
+
   .history-title {
     font-size: 1.35rem;
   }
-  
+
   .summary-card {
     padding: 1rem;
     margin-bottom: 1.25rem;
   }
-  
+
   .summary-cards {
     gap: 0.5rem;
   }
-  
+
   .summary-box {
     padding: 0.6rem;
   }
-  
+
   .summary-value {
     font-size: 1.25rem;
   }
-  
+
   .workout-card {
     padding: 1rem;
     border-radius: 10px;
   }
-  
+
   .card-stats {
     gap: 1rem;
   }
-  
+
   .stat-value {
     font-size: 1rem;
   }
-  
+
   .card-actions {
     gap: 0.5rem;
   }
-  
+
   .card-actions button {
     padding: 0.5rem 0.75rem;
     font-size: 0.85rem;
   }
-  
+
   .pagination-controls {
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.75rem;
   }
-  
+
   .pagination-btn {
     padding: 0.5rem 0.75rem;
     font-size: 0.85rem;
   }
-  
+
   .page-btn {
     width: 2.25rem;
     height: 2.25rem;
     font-size: 0.85rem;
   }
-  
+
   .empty-state {
     padding: 2rem 1rem;
   }
-  
+
   .modal {
     padding: 1.5rem;
   }
@@ -794,30 +836,30 @@ onMounted(() => {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .header-section {
     flex-direction: column;
     gap: 0.5rem;
     align-items: flex-start;
   }
-  
+
   .workout-count {
     align-self: flex-start;
   }
-  
+
   .pagination-controls {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .page-numbers {
     order: -1;
   }
-  
+
   .summary-cards {
     grid-template-columns: 1fr;
   }
-  
+
   .summary-box.full-width {
     grid-column: 1;
   }

@@ -1,12 +1,12 @@
 <script setup>
 import { ref, computed } from "vue";
-import { useToast } from "primevue/usetoast"; // ✅ import toast
+import { useToast } from "primevue/usetoast"; 
 import { workouts, addWorkout, fetchWorkouts } from "../composables/useWorkouts.js";
 import { workoutOptions } from "../composables/useWorkoutOptions.js";
 import { calculateCalories } from "../utils/calcCalories";
 import { useAuthStore } from "../stores/auth";
 
-const toast = useToast(); // ✅ init toast
+const toast = useToast(); 
 
 const auth = useAuthStore();
 const userWeight = computed(() => auth.user?.weight);
@@ -74,7 +74,6 @@ const addWorkoutHandler = async () => {
       try { await fetchWorkouts(); } catch (e) { console.warn("Re-sync failed:", e); }
     }
 
-    // ✅ PrimeVue toast for success
     toast.add({ severity: "success", summary: "Workout Added", detail: "Your workout has been logged!", life: 3000 });
 
     // reset
@@ -210,13 +209,13 @@ button:disabled {
 }
 
 select {
-  background: white; /* input box background */
+  background: white; 
   color: var(--foreground);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.75rem;
   font-size: 1rem;
-  appearance: none; /* cleaner look */
+  appearance: none; 
 }
 
 select:disabled {

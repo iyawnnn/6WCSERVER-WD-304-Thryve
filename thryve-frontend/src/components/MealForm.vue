@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { useToast } from "primevue/usetoast"; // ✅ Toast for feedback
+import { useToast } from "primevue/usetoast";
 import api from "../utils/api";
 import { meals } from "../composables/useMeals.js";
 import DatePicker from "primevue/datepicker";
@@ -20,19 +20,39 @@ const stripTime = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
 const addMeal = async () => {
   if (!foodName.value.trim()) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Meal name is required.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Meal name is required.",
+      life: 3000,
+    });
     return;
   }
   if (calories.value === null || calories.value < 0) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Calories must be 0 or higher.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Calories must be 0 or higher.",
+      life: 3000,
+    });
     return;
   }
   if (protein.value !== null && protein.value < 0) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Protein must be 0 or higher.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Protein must be 0 or higher.",
+      life: 3000,
+    });
     return;
   }
   if (stripTime(date.value) > stripTime(today)) {
-    toast.add({ severity: "warn", summary: "Validation", detail: "Date cannot be in the future.", life: 3000 });
+    toast.add({
+      severity: "warn",
+      summary: "Validation",
+      detail: "Date cannot be in the future.",
+      life: 3000,
+    });
     return;
   }
 
@@ -51,7 +71,12 @@ const addMeal = async () => {
     meals.value.unshift(res.data);
     emit("mealAdded");
 
-    toast.add({ severity: "success", summary: "Meal Added", detail: "Your meal was saved successfully.", life: 3000 });
+    toast.add({
+      severity: "success",
+      summary: "Meal Added",
+      detail: "Your meal was saved successfully.",
+      life: 3000,
+    });
 
     // Reset form
     foodName.value = "";
@@ -60,7 +85,12 @@ const addMeal = async () => {
     date.value = new Date();
   } catch (err) {
     console.error(err);
-    toast.add({ severity: "error", summary: "Error", detail: "Failed to add meal. Try again.", life: 3000 });
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Failed to add meal. Try again.",
+      life: 3000,
+    });
   } finally {
     isLoading.value = false;
   }
@@ -73,7 +103,7 @@ const addMeal = async () => {
     <div class="form-row three-cols">
       <div class="input-group">
         <label class="input-label">Meal Name</label>
-        <input 
+        <input
           v-model="foodName"
           type="text"
           placeholder="Enter meal name"
@@ -82,7 +112,7 @@ const addMeal = async () => {
       </div>
       <div class="input-group">
         <label class="input-label">Calories</label>
-        <input 
+        <input
           v-model.number="calories"
           type="number"
           min="0"
@@ -92,7 +122,7 @@ const addMeal = async () => {
       </div>
       <div class="input-group">
         <label class="input-label">Protein (g)</label>
-        <input 
+        <input
           v-model.number="protein"
           type="number"
           min="0"
@@ -106,7 +136,7 @@ const addMeal = async () => {
     <div class="form-row">
       <div class="input-group full">
         <label class="input-label">Meal Date</label>
-        <DatePicker 
+        <DatePicker
           v-model="date"
           showIcon
           :maxDate="today"
@@ -120,11 +150,7 @@ const addMeal = async () => {
 
     <!-- Row 3: Submit Button -->
     <div class="form-row">
-      <button 
-        type="submit" 
-        class="btn-submit"
-        :disabled="isLoading"
-      >
+      <button type="submit" class="btn-submit" :disabled="isLoading">
         {{ isLoading ? "Adding..." : "Add Meal" }}
       </button>
     </div>
@@ -132,7 +158,15 @@ const addMeal = async () => {
 </template>
 
 <style scoped>
-/* === Reuse WorkoutForm styles === */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 
 form {
   font-family: "Geist", sans-serif;
@@ -188,7 +222,6 @@ input:focus,
 }
 
 .btn-submit {
-  /* background-color: var(--primary); */
   color: var(--primary-foreground);
   border: none;
   padding: 0.5rem;
@@ -263,9 +296,5 @@ input:focus,
 :deep(.p-datepicker:focus-within .p-inputtext),
 :deep(.p-datepicker:focus-within .p-datepicker-dropdown) {
   border-color: var(--primary) !important;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  display: none;
 }
 </style>

@@ -21,8 +21,8 @@
   --secondary-foreground: hsl(0, 0%, 9%);
   --secondary-hover: hsl(0, 0%, 33%);
   --third-hover: #e0e0e0;
-  --light-dark: hsl(0, 0%, 25%);       
-  --light-dark-hover: hsl(0, 0%, 15%); 
+  --light-dark: hsl(0, 0%, 25%);
+  --light-dark-hover: hsl(0, 0%, 15%);
 
   /* Muted & Accent */
   --muted: hsl(0, 0%, 96.1%);
@@ -83,9 +83,11 @@
 *::after {
   box-sizing: border-box;
 }
+
 * {
   margin: 0;
 }
+
 body {
   font-family: "Geist", "Poppins", sans-serif;
   background-color: var(--background);
@@ -93,6 +95,14 @@ body {
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+body,
+input,
+select,
+button,
+textarea {
+  font-family: "Geist", sans-serif;
 }
 
 html,
@@ -352,8 +362,8 @@ input:-webkit-autofill:active {
 }
 
 .separator {
-  height: 24px;           
-  width: 1.5px;           
+  height: 24px;
+  width: 1.5px;
   background-color: var(--primary);
   border-radius: 2px;
 }
@@ -371,7 +381,6 @@ input:-webkit-autofill:active {
 ::-moz-selection {
   background: black;
   color: white;
-
 }
 
 .p-paginator .p-select {
@@ -395,9 +404,9 @@ input:-webkit-autofill:active {
   .p-inputtext,
   .p-cascadeselect,
   .p-datepicker .p-inputtext {
-    background-color: white !important; 
-    color: black !important;            
-    border: 1px solid var(--border) !important;     
+    background-color: white !important;
+    color: black !important;
+    border: 1px solid var(--border) !important;
   }
 
   input::placeholder,
@@ -414,8 +423,8 @@ input:-webkit-autofill:active {
 
   .p-cascadeselect-panel,
   .p-dropdown-panel {
-    background-color: white !important;  
-    color: black !important;             
+    background-color: white !important;
+    color: black !important;
     border: 1px solid var(--border) !important;
   }
 
@@ -427,11 +436,11 @@ input:-webkit-autofill:active {
 
   .p-cascadeselect-item:hover,
   .p-dropdown-item:hover {
-    background-color: #f0f0f0 !important; 
+    background-color: #f0f0f0 !important;
     color: black !important;
   }
 
-  .p-paginator-page.p-paginator-page-selected{
+  .p-paginator-page.p-paginator-page-selected {
     color: white;
   }
 
